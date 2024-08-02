@@ -39,3 +39,15 @@ export interface User extends Record<string, any> {
   password: string
   salt: string
 }
+
+interface WebSearchSite {
+  title: string,
+  content: string,
+  url: string,
+  score: number,
+}
+
+export interface WebSearchResult {
+  query: string,
+  results: WebSearchSite[]
+}

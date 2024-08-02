@@ -17,6 +17,10 @@ import { saveChat } from '@/app/actions'
 import { BotCard, BotMessage, SpinnerMessage, UserMessage } from '@/components/message'
 import { Chat, Message } from '@/lib/types'
 import { auth } from '@/auth'
+import { searchWeb } from '../retriever/tavily'
+import { generateText, streamText, tool } from 'ai'
+import { z } from 'zod'
+import { useStreamableText } from '../hooks/use-streamable-text'
 
 async function submitUserMessage(content: string) {
   'use server'
@@ -42,20 +46,17 @@ async function submitUserMessage(content: string) {
     model: openai('gpt-4o-mini'),
     initial: <SpinnerMessage />,
     system: `\
-    You are a stock trading conversation bot and you can help users buy stocks, step by step.
-    You and the user can discuss stock prices and the user can adjust the amount of stocks they want to buy, or place an order, in the UI.
-    
-    Messages inside [] means that it's a UI element or a user event. For example:
-    - "[Price of AAPL = 100]" means that an interface of the stock price of AAPL is shown to the user.
-    - "[User has changed the amount of AAPL to 10]" means that the user has changed the amount of AAPL to 10 in the UI.
-    
-    If the user requests purchasing a stock, call \`show_stock_purchase_ui\` to show the purchase UI.
-    If the user just wants the price, call \`show_stock_price\` to show the price.
-    If you want to show trending stocks, call \`list_stocks\`.
-    If you want to show events, call \`get_events\`.
-    If the user wants to sell stock, or complete another impossible task, respond that you are a demo and cannot do that.
-    
-    Besides that, you can also chat with users and do some calculations if needed.`,
+    Your role is to assist users by providing detailed, accurate, and helpful responses to their inquiries. You should always strive to:
+
+    Understand the user's intent and context.
+    Provide clear, concise, and informative answers.
+    Remain neutral and factual, avoiding opinions unless specifically requested.
+    Respect user privacy and confidentiality.
+    Remember, your goal is to be a helpful and reliable assistant in a wide range of topics, including general knowledge, technical assistance, creative writing, and more.
+    Always communicate in a friendly, respectful, and professional manner.
+
+    If the user asks something that requires a internet search call \`search_web\` to retrieve data from the web.
+    `,
     messages: [
       ...aiState.get().messages.map((message: any) => ({
         role: message.role,
@@ -88,10 +89,75 @@ async function submitUserMessage(content: string) {
 
       return textNode
     },
+    toolChoice: 'auto',
     tools: {
-      
-    }
-  })
+      searchWeb: {
+        description: 'Performs a web search for a specific search query',
+        parameters: z.object({
+          query: z.string().describe('search query')
+        }),
+        generate: async function* ({query}) {
+          yield (<SpinnerMessage />)
+          const {results: webSearchResults} = (await searchWeb(query))!;
+          const {textStream} = await streamText({
+            model: openai('gpt-4o-mini'),
+            prompt: `\
+                    Answer the query using the provided web results.
+
+                    Query:
+                    ${query}
+
+                    Web search results: 
+                    ${JSON.stringify(webSearchResults)}
+                    `
+          })
+
+          const stream = createStreamableValue('');
+          let entireText = '';
+          for await (let delta of textStream) {
+            entireText += delta
+            yield (<BotMessage content={entireText} />)
+            stream.update(delta)
+          }
+          stream.done()
+
+          const toolCallId = nanoid()
+
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'searchWeb',
+                    toolCallId,
+                    args: { query }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'searchWeb',
+                    toolCallId,
+                    result: entireText
+                  }
+                ]
+              }
+            ]
+          })
+
+          return <BotMessage content={entireText} />
+        }
+      }
+  }})
 
   return {
     id: nanoid(),
@@ -170,11 +236,8 @@ export const getUIStateFromAIState = (aiState: Chat) => {
       display:
         message.role === 'tool' ? (
           message.content.map(tool => {
-            return tool.toolName === 'webSearch' ? (
-              <BotCard>
-                {/* TODO: Display webSearch result*/}
-                <></>
-              </BotCard>
+            return tool.toolName === 'searchWeb' ? (
+              <BotMessage content={tool.result as string} />
             ) : null
           })
         ) : message.role === 'user' ? (

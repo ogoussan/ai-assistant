@@ -35,24 +35,24 @@ export function ChatPanel({
 
   const exampleMessages = [
     {
-      heading: 'What are the',
-      subheading: 'trending memecoins today?',
-      message: `What are the trending memecoins today?`
+      heading: 'Can you explain',
+      subheading: 'how to implement a binary search algorithm in Python?',
+      message: `Can you explain how to implement a binary search algorithm in Python?`
     },
     {
-      heading: 'What is the price of',
-      subheading: '$DOGE right now?',
-      message: 'What is the price of $DOGE right now?'
+      heading: 'Write a short story',
+      subheading: 'about a time traveler who accidentally lands in the wrong era.',
+      message: 'Write a short story about a time traveler who accidentally lands in the wrong era.'
     },
     {
-      heading: 'I would like to buy',
-      subheading: '42 $DOGE',
-      message: `I would like to buy 42 $DOGE`
+      heading: 'What are the main differences',
+      subheading: 'What are the main differences between renewable and non-renewable energy sources?',
+      message: `What are the main differences between renewable and non-renewable energy sources?`
     },
     {
-      heading: 'What are some',
-      subheading: `recent events about $DOGE?`,
-      message: `What are some recent events about $DOGE?`
+      heading: 'What are the top five',
+      subheading: `must-see attractions in Paris for first-time visitors?`,
+      message: `What are the top five must-see attractions in Paris for first-time visitors?`
     }
   ]
 
