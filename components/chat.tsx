@@ -6,15 +6,14 @@ import { ChatPanel } from '@/components/chat-panel'
 import { EmptyScreen } from '@/components/empty-screen'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import { useEffect, useState } from 'react'
-import { useUIState, useAIState } from 'ai/rsc'
-import { Message, Session } from '@/lib/types'
+import { Session } from '@/lib/types'
 import { usePathname, useRouter } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
+import { useChatMessages } from '@/lib/hooks/useChatMessasges'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
-  initialMessages?: Message[]
-  id?: string
+  id: string
   session?: Session
   missingKeys: string[]
 }
@@ -23,8 +22,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
   const [input, setInput] = useState('')
-  const [messages] = useUIState()
-  const [aiState] = useAIState()
+  const { messages, sendMessage } = useChatMessages(id, session?.user.id)
 
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
@@ -37,11 +35,11 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
   }, [id, path, session?.user, messages])
 
   useEffect(() => {
-    const messagesLength = aiState.messages?.length
+    const messagesLength = messages?.length
     if (messagesLength === 2) {
       router.refresh()
     }
-  }, [aiState.messages, router])
+  }, [messages, router])
 
   useEffect(() => {
     setNewChatId(id)
@@ -53,8 +51,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
     })
   }, [missingKeys])
 
-  const { messagesRef, scrollRef, visibilityRef, isAtBottom, scrollToBottom } =
-    useScrollAnchor()
+  const { messagesRef, scrollRef, visibilityRef, isAtBottom, scrollToBottom } = useScrollAnchor()
 
   return (
     <div
@@ -74,8 +71,10 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
       </div>
       <ChatPanel
         id={id}
+        messages={messages}
         input={input}
         setInput={setInput}
+        sendMessage={sendMessage}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
       />

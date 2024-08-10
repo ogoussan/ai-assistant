@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation'
 import { kv } from '@vercel/kv'
 
 import { auth } from '@/auth'
-import { type Chat } from '@/lib/types'
+import { Message, type Chat } from '@/lib/types'
+import { respondToUserMessage } from '@/lib/ai/chat-completion'
 
 export async function getChats(userId?: string | null) {
   if (!userId) {
@@ -153,4 +154,8 @@ export async function getMissingKeys() {
   return keysRequired
     .map(key => (process.env[key] ? '' : key))
     .filter(key => key !== '')
+}
+
+export async function submitUserMessage(message: Message, previousMessages: Message[], chatId?: string) {
+  return await respondToUserMessage(message, previousMessages, chatId)
 }
