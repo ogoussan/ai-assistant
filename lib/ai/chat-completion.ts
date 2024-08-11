@@ -30,7 +30,7 @@ export async function respondToUserMessage(message: Message, previousMessages: M
         historyMessagesKey: "history",
         });
 
-    return chainWithHistory.invoke({message: message.content}, {configurable: { sessionId: chatId }})
+    return await chainWithHistory.stream({message: message.content}, {configurable: { sessionId: chatId }})
 }
 
 function getHistoryFromMessages(messasges: Message[]) {

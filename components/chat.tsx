@@ -22,7 +22,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
   const router = useRouter()
   const path = usePathname()
   const [input, setInput] = useState('')
-  const { messages, sendMessage } = useChatMessages(id, session?.user.id)
+  const { messages, sendMessage, streamedResponse } = useChatMessages(id, session?.user.id)
 
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
@@ -63,7 +63,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
         ref={messagesRef}
       >
         {messages.length ? (
-          <ChatList messages={messages} isShared={false} session={session} />
+          <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} session={session} />
         ) : (
           <EmptyScreen />
         )}

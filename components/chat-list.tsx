@@ -3,17 +3,22 @@ import { Message, Session } from '@/lib/types'
 import Link from 'next/link'
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons'
 import { renderMessage } from './message'
+import { useMemo } from 'react'
+import { nanoid } from 'nanoid'
 
 export interface ChatList {
   messages: Message[]
+  streamedResponse?: string
   session?: Session
   isShared: boolean
 }
 
-export function ChatList({ messages, session, isShared }: ChatList) {
+export function ChatList({ messages, session, isShared, streamedResponse }: ChatList) {
   if (!messages.length) {
     return null
   }
+
+  const messagesWithStreamedResponse = useMemo(() => (streamedResponse ? [...messages, {id: nanoid(), role: 'assistant', content: streamedResponse}] : messages), [streamedResponse])
 
   return (
     <div className="relative mx-auto max-w-2xl px-4">
@@ -41,10 +46,10 @@ export function ChatList({ messages, session, isShared }: ChatList) {
         </>
       ) : null}
 
-      {messages.map((message, index) => (
+      {messagesWithStreamedResponse.map((message, index) => (
         <div key={message.id}>
           {renderMessage(message.role, message.content as string)}
-          {index < messages.length - 1 && <Separator className="my-4" />}
+          {index < messagesWithStreamedResponse.length - 1 && <Separator className="my-4" />}
         </div>
       ))}
     </div>
