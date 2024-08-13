@@ -1,4 +1,4 @@
-import { respondToUserMessage } from "@/lib/ai/chat-completion";
+import { respondToUserMessage } from "@/lib/assistant/chat-completion";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {

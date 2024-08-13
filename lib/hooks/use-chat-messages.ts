@@ -57,7 +57,7 @@ export function useChatMessages(chatId: string, userId?: string) {
         ])
 
         try {
-            const response = await fetch('api', {
+            const response = await fetch('api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,6 +101,8 @@ export function useChatMessages(chatId: string, userId?: string) {
             console.error('Fetch failed:', error);
         }
     }
+
+    // Todo: Load pdf
 
     return { messages, sendMessage, streamedResponse }
 }

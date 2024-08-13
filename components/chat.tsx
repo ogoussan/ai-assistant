@@ -10,7 +10,7 @@ import { Session } from '@/lib/types'
 import { usePathname, useRouter } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
-import { useChatMessages } from '@/lib/hooks/useChatMessasges'
+import { useChatMessages } from '@/lib/hooks/use-chat-messages'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   id: string

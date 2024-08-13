@@ -52,3 +52,9 @@ export interface WebSearchResult {
   query: string,
   results: WebSearchSite[]
 }
+
+export interface FileData {
+  arrayBuffer: ArrayBuffer,
+  name: string,
+  type: string,
+}

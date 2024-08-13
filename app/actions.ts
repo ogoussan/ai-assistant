@@ -6,7 +6,7 @@ import { kv } from '@vercel/kv'
 
 import { auth } from '@/auth'
 import { type Chat } from '@/lib/types'
-import { respondToUserMessage } from '@/lib/ai/chat-completion'
+import { respondToUserMessage } from '@/lib/assistant/chat-completion'
 
 export async function getChats(userId?: string | null) {
   if (!userId) {

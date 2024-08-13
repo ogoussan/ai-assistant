@@ -3,14 +3,15 @@
 import * as React from 'react'
 import Textarea from 'react-textarea-autosize'
 import { Button } from '@/components/ui/button'
-import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
+import { IconArrowElbow, IconPaperClip } from '@/components/ui/icons'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
 import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
-import { useRouter } from 'next/navigation'
+import { PdfPreview } from './pdf-preview'
+import { FileData } from '@/lib/types'
 
 export function PromptForm({
   input,
@@ -21,9 +22,11 @@ export function PromptForm({
   setInput: (value: string) => void
   sendUserMessage: (content: string) => Promise<void>
 }) {
-  const router = useRouter()
+  const [files, setFiles] = React.useState<FileData[]>([])
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -31,13 +34,27 @@ export function PromptForm({
     }
   }, [])
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    console.log(file?.name)
+    if (file) {
+      const { name, type } = file;
+      const arrayBuffer = await file.arrayBuffer()
+      const fileData = { name, arrayBuffer, type }
+      setFiles((prev) => [...prev, fileData])
+    }
+  }
+
+  const removeFile = (index: number) => {
+    setFiles(() => files.filter((_, i) => index !== i))
+  }
+
   return (
     <form
       ref={formRef}
       onSubmit={async (e: any) => {
         e.preventDefault()
 
-        // Blur focus on mobile
         if (window.innerWidth < 600) {
           e.target['message']?.blur()
         }
@@ -49,7 +66,7 @@ export function PromptForm({
         sendMessage(value)
       }}
     >
-      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12">
+      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-12 py-4 sm:rounded-md sm:border sm:px-12">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -57,21 +74,31 @@ export function PromptForm({
               size="icon"
               className="absolute left-0 top-[14px] size-8 rounded-full bg-background p-0 sm:left-4"
               onClick={() => {
-                router.push('/new')
+                fileInputRef.current?.click()
               }}
             >
-              <IconPlus />
-              <span className="sr-only">New Chat</span>
+              <IconPaperClip />
+              <span className="sr-only">Upload document</span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
+          <TooltipContent>Upload document</TooltipContent>
         </Tooltip>
+        <input
+          ref={fileInputRef}
+          type="file"
+          style={{ display: 'none' }}
+          accept="application/pdf,image/*,text/plain,text/javascript"
+          onChange={handleFileChange}
+        />
+        <div className="flex gap-4 overflow-x-scroll">
+          {files.map(({arrayBuffer, name, type}, index) => (<PdfPreview key={index} arrayBuffer={arrayBuffer} name={name} type={type} onClose={() => removeFile(index)} />))}
+        </div>
         <Textarea
           ref={inputRef}
           tabIndex={0}
           onKeyDown={onKeyDown}
           placeholder="Send a message."
-          className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
+          className="min-h-[60px] w-full resize-none bg-transparent py-[1.3rem] focus-within:outline-none sm:text-sm"
           autoFocus
           spellCheck={false}
           autoComplete="off"
