@@ -42,8 +42,18 @@ export function ChatPanel({
       heading: 'Create a budget',
       subheading: 'for saving for a vacation in the next year.',
       message: `Can you help me create a budget for saving for a vacation in the next year?`
+    },
+    {
+      heading: 'Organize a workout routine',
+      subheading: 'to improve fitness over the next three months.',
+      message: `Can you help me organize a workout routine to improve my fitness over the next three months?`
+    },
+    {
+      heading: 'Develop a study plan',
+      subheading: 'for preparing for an upcoming exam.',
+      message: `Can you help me develop a study plan for preparing for my upcoming exam?`
     }
-];
+  ];
 
   return (
     <>

@@ -3,7 +3,6 @@
 import { cn } from '@/lib/utils'
 import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
-import { EmptyScreen } from '@/components/empty-screen'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import { useEffect, useState } from 'react'
 import { Session } from '@/lib/types'
@@ -62,11 +61,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
         className={cn('pb-[200px] pt-4 md:pt-10', className)}
         ref={messagesRef}
       >
-        {messages.length ? (
-          <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} session={session} />
-        ) : (
-          <EmptyScreen />
-        )}
+        <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} session={session} />
         <div className="w-full h-px" ref={visibilityRef} />
       </div>
       <ChatPanel
