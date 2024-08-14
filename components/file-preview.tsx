@@ -3,15 +3,14 @@ import { CloseButton } from './close-button';
 import { spinner } from './spinner'
 import { TurnicatedText } from './turnicate-text';
 
-interface PdfPreviewProps {
+interface FilePreviewProps {
     name: string;
     arrayBuffer: ArrayBuffer;
     type: string;
     onClose?: () => void;
 }
 
-export function PdfPreview({ arrayBuffer, name, type, onClose }: PdfPreviewProps) {
-    console.log(type)
+export function FilePreview({ arrayBuffer, name, type, onClose }: FilePreviewProps) {
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
     useEffect(() => {
