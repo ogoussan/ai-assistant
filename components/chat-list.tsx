@@ -13,12 +13,8 @@ export interface ChatList {
   isShared: boolean
 }
 
-export function ChatList({ messages, session, isShared, streamedResponse }: ChatList) {
-  if (!messages.length) {
-    return null
-  }
-
-  const messagesWithStreamedResponse = useMemo(() => (streamedResponse ? [...messages, {id: nanoid(), role: 'assistant', content: streamedResponse}] : messages), [streamedResponse])
+export function ChatList({ messages = [], session, isShared, streamedResponse }: ChatList) {
+ const messagesWithStreamedResponse = useMemo(() => (streamedResponse ? [...messages, {id: nanoid(), role: 'assistant', content: streamedResponse}] : messages), [streamedResponse])
 
   return (
     <div className="relative mx-auto max-w-2xl px-4">
