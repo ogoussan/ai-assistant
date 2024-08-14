@@ -4,10 +4,9 @@ import { shareChat } from '@/app/actions'
 import { Button } from '@/components/ui/button'
 import { PromptForm } from '@/components/prompt-form'
 import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
-import { IconCloudUpload, IconShare } from '@/components/ui/icons'
+import { IconShare } from '@/components/ui/icons'
 import { ChatShareDialog } from '@/components/chat-share-dialog'
-import { Message } from '@/lib/types'
-import { FileDropOver } from './file-drop-over'
+import { FileData, Message } from '@/lib/types'
 
 export interface ChatPanelProps {
   id?: string
@@ -15,7 +14,7 @@ export interface ChatPanelProps {
   messages: Message[]
   input: string
   setInput: (value: string) => void
-  sendMessage: (content: string) => Promise<void>
+  sendMessage: (content: string, files: FileData[]) => Promise<void>
   isAtBottom: boolean
   scrollToBottom: () => void
 }
@@ -71,7 +70,7 @@ export function ChatPanel({
                   className={`cursor-pointer rounded-lg border bg-white p-4 hover:bg-zinc-50 dark:bg-zinc-950 dark:hover:bg-zinc-900 ${index > 1 && 'hidden md:block'
                     }`}
                   onClick={async () => {
-                    sendUserMessage(example.message)
+                    sendUserMessage(example.message, [])
                   }}
                 >
                   <div className="text-sm font-semibold">{example.heading}</div>

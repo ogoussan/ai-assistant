@@ -1,88 +1,83 @@
-'use client'
-
-import * as React from 'react'
-import Textarea from 'react-textarea-autosize'
-import { Button } from '@/components/ui/button'
-import { IconArrowElbow, IconCloudUpload, IconPaperClip } from '@/components/ui/icons'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
-} from '@/components/ui/tooltip'
-import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
-import { FilePreview } from './file-preview'
-import { FileData } from '@/lib/types'
-import { FileDropOver } from './file-drop-over'
+import * as React from 'react';
+import Textarea from 'react-textarea-autosize';
+import { Button } from '@/components/ui/button';
+import { IconArrowElbow, IconPaperClip } from '@/components/ui/icons';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useEnterSubmit } from '@/lib/hooks/use-enter-submit';
+import { FilePreview } from './file-preview';
+import { FileData } from '@/lib/types';
+import { FileDropOver } from './file-drop-over';
 
 export function PromptForm({
   input,
   setInput,
   sendUserMessage: sendMessage
 }: {
-  input: string
-  setInput: (value: string) => void
-  sendUserMessage: (content: string) => Promise<void>
+  input: string;
+  setInput: (value: string) => void;
+  sendUserMessage: (content: string, files: FileData[]) => Promise<void>;
 }) {
-  const [files, setFiles] = React.useState<FileData[]>([])
+  const [files, setFiles] = React.useState<FileData[]>([]);
   const [isDragging, setIsDragging] = React.useState(false);
-  const { formRef, onKeyDown } = useEnterSubmit()
-  const inputRef = React.useRef<HTMLTextAreaElement>(null)
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
-
+  const { formRef, onKeyDown } = useEnterSubmit();
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [])
+  }, []);
 
   const handleDragEnter = () => {
-   setIsDragging(true)
-  }
+    setIsDragging(true);
+  };
 
   const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleDrop = (fileData: FileData) => {
-    setIsDragging(false)
-    setFiles((prev) => [...prev, fileData])
-  }
+    setIsDragging(false);
+    setFiles((prev) => [...prev, fileData]);
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
       const { name, type } = file;
-      const arrayBuffer = await file.arrayBuffer()
-      const fileData = { name, arrayBuffer, type }
-      setFiles((prev) => [...prev, fileData])
+      const arrayBuffer = await file.arrayBuffer();
+      const fileData = { name, arrayBuffer, type };
+      setFiles((prev) => [...prev, fileData]);
     }
-  }
+  };
 
   const removeFile = (index: number) => {
-    setFiles(() => files.filter((_, i) => index !== i))
-  }
+    setFiles(() => files.filter((_, i) => index !== i));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (window.innerWidth < 600) {
+      e.currentTarget['message']?.blur();
+    }
+
+    const value = input.trim();
+    setInput('');
+    if (!value && files.length === 0) return;
+
+    await sendMessage(value, files);
+    setFiles([]); // Clear files after sending
+  };
 
   return (
     <>
-      <form
-        ref={formRef}
-        onSubmit={async (e: any) => {
-          e.preventDefault()
-
-          if (window.innerWidth < 600) {
-            e.target['message']?.blur()
-          }
-
-          const value = input.trim()
-          setInput('')
-          if (!value) return
-
-          sendMessage(value)
-        }}
-      >
+      <form ref={formRef} onSubmit={handleSubmit}>
         <div className="flex gap-4 px-4 overflow-x-scroll">
-          {files.map(({ arrayBuffer, name, type }, index) => (<FilePreview key={index} arrayBuffer={arrayBuffer} name={name} type={type} onClose={() => removeFile(index)} />))}
+          {files.map(({ arrayBuffer, name, type }, index) => (
+            <FilePreview key={index} arrayBuffer={arrayBuffer} name={name} type={type} onClose={() => removeFile(index)} />
+          ))}
         </div>
         <div className="relative flex flex-row items-end gap-4 max-h-60 w-full grow overflow-hidden bg-background px-4 py-4 sm:rounded-md">
           <input
@@ -99,7 +94,7 @@ export function PromptForm({
                 size="icon"
                 className="size-8 rounded-full bg-background p-0 sm:left-4"
                 onClick={() => {
-                  fileInputRef.current?.click()
+                  fileInputRef.current?.click();
                 }}
               >
                 <IconPaperClip />
@@ -121,12 +116,12 @@ export function PromptForm({
             name="message"
             rows={1}
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
           />
           <div>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button type="submit" size="icon" disabled={input === ''}>
+                <Button type="submit" size="icon" disabled={input === '' && files.length === 0}>
                   <IconArrowElbow />
                   <span className="sr-only">Send message</span>
                 </Button>
@@ -138,5 +133,5 @@ export function PromptForm({
       </form>
       <FileDropOver open={isDragging} onDragEnter={handleDragEnter} onDragLeave={handleDragLeave} onDrop={handleDrop} />
     </>
-  )
+  );
 }
