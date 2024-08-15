@@ -51,23 +51,21 @@ export function useChatMessages(chatId: string, userId?: string) {
             content,
         };
     
-        // Add user message to the chat
         setMessages((previousMessages) => [
             ...previousMessages,
             userMessage,
         ]);
-    
-        // Create FormData to handle file uploads
+
         const formData = new FormData();
         if (files.length > 0) {
             files.forEach((fileData, index) => {
                 const fileBlob = new Blob([fileData.arrayBuffer], { type: fileData.type });
                 formData.append('files', fileBlob, fileData.name);
-            });
+            })
         }
-        formData.append('message', content);
-        formData.append('previousMessages', JSON.stringify([]));
-        formData.append('chatId', chatId);
+        formData.append('message', content)
+        formData.append('previousMessages', JSON.stringify(messages))
+        formData.append('chatId', chatId)
     
         try {
             const response = await fetch('api/chat', {

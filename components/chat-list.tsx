@@ -14,7 +14,9 @@ export interface ChatList {
 }
 
 export function ChatList({ messages = [], session, isShared, streamedResponse }: ChatList) {
- const messagesWithStreamedResponse = useMemo(() => (streamedResponse ? [...messages, {id: nanoid(), role: 'assistant', content: streamedResponse}] : messages), [streamedResponse])
+ const messagesWithStreamedResponse = useMemo(() => (streamedResponse ? [...messages, {id: nanoid(), role: 'assistant', content: streamedResponse}] : messages), [streamedResponse, messages])
+
+ console.log(messagesWithStreamedResponse)
 
   return (
     <div className="relative mx-auto max-w-2xl px-4">

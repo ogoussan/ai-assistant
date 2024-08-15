@@ -1,40 +1,44 @@
-import { respondToUserMessage } from "@/lib/assistant/chat-completion";
 import { NextResponse } from "next/server";
 import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf";
+import { respondToUserMessage } from "@/lib/assistant/chat-completion";
+import { nanoid } from "@/lib/utils";
+import { Message } from "@/lib/types";
 
 export async function POST(request: Request) {
     try {
         const contentType = request.headers.get('Content-Type') || '';
-
         if (contentType.includes('multipart/form-data')) {
             const formData = await request.formData();
 
-            const message = formData.get('message') as string;
-            const files = formData.getAll('files') as Blob[];
+            
+            const previousMessages = JSON.parse(formData.get('previousMessages') as string) as Message[]
+            const chatId = formData.get('chatId') as string
+            const files = formData.getAll('files') as Blob[]
 
-            let document;
+            let documents;
+
             if (files.length > 0) {
                 const pdfFile = files.find(file => file.type === 'application/pdf');
                 if (pdfFile) {
                     const arrayBuffer = await pdfFile.arrayBuffer();
                     const loader = new WebPDFLoader(new Blob([arrayBuffer], { type: 'application/pdf' }));
-                    document = await loader.load();
-                    console.log(document)
+                    documents = await loader.load();
+                    console.log(documents[0])
                 } else {
                     return NextResponse.json({ message: 'Invalid file type. Please upload a PDF.' }, { status: 400 });
                 }
             }
 
-            return NextResponse.json({
-                message: 'File processed successfully',
-                document,
-                userMessage: message,
-            });
+            const message: Message = {
+                id: nanoid(),
+                role: 'user',
+                content: `${formData.get('message') as string} ${files.length 
+                    ? 'use this file content as context: ' + documents[0].pageContent 
+                    : ''
+                }`,
+            }
 
-        } else {
-            const { message, previousMessages, chatId } = await request.json();
-            const stream = await respondToUserMessage(message, previousMessages, chatId);
-
+            const stream = await respondToUserMessage(message, previousMessages, chatId)
             const readableStream = new ReadableStream({
                 async start(controller) {
                     for await (const chunk of stream) {

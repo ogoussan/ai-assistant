@@ -64,11 +64,12 @@ export function PromptForm({
     }
 
     const value = input.trim();
-    setInput('');
-    if (!value && files.length === 0) return;
+    if (!value && files.length === 0) return
+    const selectedFiles = files
+    setInput('')
+    setFiles([])
 
-    await sendMessage(value, files);
-    setFiles([]); // Clear files after sending
+    await sendMessage(value, selectedFiles)
   };
 
   return (
