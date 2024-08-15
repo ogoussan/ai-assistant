@@ -26,15 +26,15 @@ export function FilePreview({ arrayBuffer, name, type, onClose }: FilePreviewPro
     }, [arrayBuffer]);
 
     return (
-        <div className='flex flex-col justify-between align-center' style={{ width: '100px'}}>
-            <div className='ml-auto px-1 relative top-7'>
+        <div className='flex flex-col justify-between align-center' style={{ width: '75px'}}>
+            <div className='ml-auto px-1 relative top-4 left-2'>
                 <CloseButton onClick={onClose} />
             </div>
             {pdfUrl ? (
                 <object
                     width='100%'
                     height='100%'
-                    style={{ width: '100px', height: '100px', pointerEvents: 'none', borderRadius: 12 }}
+                    style={{ width: '75px', height: '75px', pointerEvents: 'none', borderRadius: 12 }}
                     data={pdfUrl}
                     type={type}
                 >

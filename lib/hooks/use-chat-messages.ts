@@ -47,13 +47,20 @@ export function useChatMessages(chatId: string, userId?: string) {
     async function sendMessage(content: string, files: FileData[] = []) {
         const userMessage: Message = {
             id: nanoid(),
-            role: 'user',
+            type: 'user',
             content,
         };
+
+        const fileMessages: Message[] = files.map((file) => ({
+            id: nanoid(),
+            type: 'file',
+            content: file,
+        })) || []
     
         setMessages((previousMessages) => [
             ...previousMessages,
-            userMessage,
+            ...(content ? [userMessage] : []),
+            ...fileMessages,
         ]);
 
         const formData = new FormData();
@@ -95,7 +102,7 @@ export function useChatMessages(chatId: string, userId?: string) {
                 ...previousMessages,
                 {
                     id: nanoid(),
-                    role: 'assistant',
+                    type: 'assistant',
                     content: fullText,
                 }
             ]);

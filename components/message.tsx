@@ -1,6 +1,6 @@
 'use client'
 
-import { IconOpenAI, IconUser } from '@/components/ui/icons'
+import { IconFile, IconOpenAI, IconUser } from '@/components/ui/icons'
 import { cn } from '@/lib/utils'
 import { spinner } from './spinner'
 import { CodeBlock } from './ui/codeblock'
@@ -8,15 +8,17 @@ import { MemoizedReactMarkdown } from './markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { ReactNode } from 'react'
+import { FileData } from '@/lib/types'
 
-export function renderMessage(role: string, content: string): ReactNode {
+export function renderMessage(type: string, content: string | FileData): ReactNode {
   const messageMap = {
-    user: () => <UserMessage>{content}</UserMessage>,
-    assistant: () => <BotMessage content={content} />,
-    system: () => <SystemMessage>{content}</SystemMessage>,
+    user: () => <UserMessage>{content as string}</UserMessage>,
+    assistant: () => <BotMessage content={content as string} />,
+    system: () => <SystemMessage>{content as string}</SystemMessage>,
+    file: () => <FileMessage name={(content as FileData).name} type={(content as FileData).type} />
   }
 
-  return messageMap[role]();
+  return messageMap[type]();
 }
 
 export function UserMessage({ children }: { children: React.ReactNode }) {
@@ -133,6 +135,20 @@ export function SpinnerMessage() {
       </div>
       <div className="ml-4 h-[24px] flex flex-row items-center flex-1 space-y-2 overflow-hidden px-1">
         {spinner}
+      </div>
+    </div>
+  )
+}
+
+export default function FileMessage({name, type}: {name: string, type: string}) {
+  return (
+    <div className="flex items-center gap-3 rounded-md bg-muted p-3 w-full">
+      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+        <IconFile className="h-5 w-5" />
+      </div>
+      <div className="flex-1 space-y-1">
+        <div className="font-medium">{name}</div>
+        <div className="text-xs text-muted-foreground">{type}</div>
       </div>
     </div>
   )

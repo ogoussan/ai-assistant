@@ -43,6 +43,7 @@ export function PromptForm({
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault()
     const file = e.target.files?.[0];
     if (file) {
       const { name, type } = file;
@@ -91,10 +92,10 @@ export function PromptForm({
           <Button
             variant="outline"
             size="icon"
+            type="button" 
             className="size-8 rounded-full bg-background p-0 sm:left-4"
-            onClick={(event) => {
-              event.preventDefault()
-              fileInputRef.current?.click()
+            onClick={() => {
+              fileInputRef.current?.click();
             }}
           >
             <IconPaperClip />

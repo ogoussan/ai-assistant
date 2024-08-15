@@ -14,7 +14,7 @@ export interface ChatList {
 }
 
 export function ChatList({ messages = [], session, isShared, streamedResponse }: ChatList) {
- const messagesWithStreamedResponse = useMemo(() => (streamedResponse ? [...messages, {id: nanoid(), role: 'assistant', content: streamedResponse}] : messages), [streamedResponse, messages])
+ const messagesWithStreamedResponse = useMemo(() => (streamedResponse ? [...messages, {id: nanoid(), type: 'assistant', content: streamedResponse}] : messages), [streamedResponse, messages])
 
  console.log(messagesWithStreamedResponse)
 
@@ -46,7 +46,7 @@ export function ChatList({ messages = [], session, isShared, streamedResponse }:
 
       {messagesWithStreamedResponse.map((message, index) => (
         <div key={message.id}>
-          {renderMessage(message.role, message.content as string)}
+          {renderMessage(message.type, message.content as string)}
           {index < messagesWithStreamedResponse.length - 1 && <Separator className="my-4" />}
         </div>
       ))}
