@@ -87,22 +87,18 @@ export function PromptForm({
             accept="application/pdf,image/*,text/plain,text/javascript"
             onChange={handleFileChange}
           />
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8 rounded-full bg-background p-0 sm:left-4"
-                onClick={() => {
-                  fileInputRef.current?.click();
-                }}
-              >
-                <IconPaperClip />
-                <span className="sr-only">Upload document</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Upload document</TooltipContent>
-          </Tooltip>
+          <Button
+            variant="outline"
+            size="icon"
+            className="size-8 rounded-full bg-background p-0 sm:left-4"
+            onClick={(event) => {
+              event.preventDefault()
+              fileInputRef.current?.click()
+            }}
+          >
+            <IconPaperClip />
+            <span className="sr-only">Upload document</span>
+          </Button>
           <Textarea
             ref={inputRef}
             tabIndex={0}
