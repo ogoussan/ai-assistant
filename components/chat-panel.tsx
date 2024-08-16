@@ -70,7 +70,7 @@ export function ChatPanel({
                   className={`cursor-pointer rounded-lg border bg-white p-4 hover:bg-zinc-50 dark:bg-zinc-950 dark:hover:bg-zinc-900 ${index > 1 && 'hidden md:block'
                     }`}
                   onClick={async () => {
-                    sendUserMessage(example.message, [])
+                    await sendUserMessage(example.message, [])
                   }}
                 >
                   <div className="text-sm font-semibold">{example.heading}</div>

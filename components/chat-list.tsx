@@ -2,7 +2,7 @@ import { Separator } from '@/components/ui/separator'
 import { Message, Session } from '@/lib/types'
 import Link from 'next/link'
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons'
-import { renderMessage } from './message'
+import { renderMessage, SpinnerMessage } from './message'
 import { useMemo } from 'react'
 import { nanoid } from 'nanoid'
 
@@ -11,12 +11,11 @@ export interface ChatList {
   streamedResponse?: string
   session?: Session
   isShared: boolean
+  isLoading?: boolean
 }
 
-export function ChatList({ messages = [], session, isShared, streamedResponse }: ChatList) {
+export function ChatList({ messages = [], session, isShared, streamedResponse, isLoading }: ChatList) {
  const messagesWithStreamedResponse = useMemo(() => (streamedResponse ? [...messages, {id: nanoid(), type: 'assistant', content: streamedResponse}] : messages), [streamedResponse, messages])
-
- console.log(messagesWithStreamedResponse)
 
   return (
     <div className="relative mx-auto max-w-2xl px-4">
@@ -50,6 +49,7 @@ export function ChatList({ messages = [], session, isShared, streamedResponse }:
           {index < messagesWithStreamedResponse.length - 1 && <Separator className="my-4" />}
         </div>
       ))}
+      { isLoading && !streamedResponse && <><Separator className="my-4" /><SpinnerMessage /></>}
     </div>
   )
 }

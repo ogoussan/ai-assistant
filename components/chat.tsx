@@ -5,7 +5,7 @@ import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import { useEffect, useState } from 'react'
-import { Session } from '@/lib/types'
+import { FileData, Session } from '@/lib/types'
 import { usePathname, useRouter } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
@@ -22,6 +22,15 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
   const path = usePathname()
   const [input, setInput] = useState('')
   const { messages, sendMessage, streamedResponse } = useChatMessages(id, session?.user.id)
+  const [isRespondLoading, setIsRespondLoading] = useState(false)
+
+  console.log('loading', isRespondLoading)
+
+  const _sendMessage = async (content: string, files?: FileData[]) => {
+    setIsRespondLoading(true)
+    await sendMessage(content, files)
+    setIsRespondLoading(false)
+  }
 
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
@@ -61,7 +70,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
         className={cn('pb-[200px] pt-4 md:pt-10', className)}
         ref={messagesRef}
       >
-        <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} session={session} />
+        <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} session={session} isLoading={isRespondLoading} />
         <div className="w-full h-px" ref={visibilityRef} />
       </div>
       <ChatPanel
@@ -69,7 +78,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
         messages={messages}
         input={input}
         setInput={setInput}
-        sendMessage={sendMessage}
+        sendMessage={_sendMessage}
         isAtBottom={isAtBottom}
         scrollToBottom={scrollToBottom}
       />
