@@ -7,6 +7,7 @@ import { useEnterSubmit } from '@/lib/hooks/use-enter-submit';
 import { FilePreview } from './file-preview';
 import { FileData } from '@/lib/types';
 import { FileDropOver } from './file-drop-over';
+import { supportedFileTypes } from '@/constants/supported-file-types';
 
 export function PromptForm({
   input,
@@ -86,13 +87,13 @@ export function PromptForm({
             ref={fileInputRef}
             type="file"
             style={{ display: 'none' }}
-            accept="application/pdf,image/*,text/plain,text/javascript"
+            accept={supportedFileTypes.join(',')}
             onChange={handleFileChange}
           />
           <Button
             variant="outline"
             size="icon"
-            type="button" 
+            type="button"
             className="size-8 rounded-full bg-background p-0 sm:left-4"
             onClick={() => {
               fileInputRef.current?.click();

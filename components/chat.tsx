@@ -24,8 +24,6 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
   const { messages, sendMessage, streamedResponse } = useChatMessages(id, session?.user.id)
   const [isRespondLoading, setIsRespondLoading] = useState(false)
 
-  console.log('loading', isRespondLoading)
-
   const _sendMessage = async (content: string, files?: FileData[]) => {
     setIsRespondLoading(true)
     await sendMessage(content, files)

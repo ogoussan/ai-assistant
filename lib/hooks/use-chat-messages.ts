@@ -3,7 +3,7 @@ import { Chat, FileData, Message } from "@/lib/types";
 import { nanoid } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
-export function useChatMessages(chatId: string, userId?: string) {
+export function useChatMessages(chatId: string,  userId?: string) {
     const [messages, setMessages] = useState<Message[]>([])
     const [streamedResponse, setStreamedResponse] = useState<string | undefined>('')
 
@@ -28,9 +28,15 @@ export function useChatMessages(chatId: string, userId?: string) {
             const createdAt = new Date()
             const path = `/chat/${chatId}`
 
-            const firstMessageContent = messages[0].content as string
-            const title = firstMessageContent.substring(0, 100)
 
+            const [firstMessage, secondMessage] = messages;
+            const firstMessageContent = firstMessage.type !== 'file' 
+                ? firstMessage.content as string 
+                : secondMessage 
+                    ? secondMessage.content as string 
+                    : (firstMessage.content as { name: string, type: string }).name
+
+            const title = firstMessageContent.substring(0, 100)
             const chat: Chat = {
                 id: chatId,
                 title,
@@ -39,7 +45,7 @@ export function useChatMessages(chatId: string, userId?: string) {
                 messages,
                 path
             }
-
+            
             saveChat(chat);
         })()
     }, [messages])
@@ -54,7 +60,10 @@ export function useChatMessages(chatId: string, userId?: string) {
         const fileMessages: Message[] = files.map((file) => ({
             id: nanoid(),
             type: 'file',
-            content: file,
+            content: {
+                name: file.name,
+                type: file.type
+            }
         })) || []
     
         setMessages((previousMessages) => [

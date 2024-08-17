@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import { CloseButton } from './close-button';
 import { spinner } from './spinner'
 import { TurnicatedText } from './turnicate-text';
+import { IconFile } from './ui/icons';
 
 interface FilePreviewProps {
     name: string;
@@ -11,13 +12,13 @@ interface FilePreviewProps {
 }
 
 export function FilePreview({ arrayBuffer, name, type, onClose }: FilePreviewProps) {
-    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+    const [fileUrl, setFileUrl] = useState<string | null>(null);
 
     useEffect(() => {
         if (arrayBuffer) {
             const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
-            setPdfUrl(url);
+            setFileUrl(url);
 
             return () => {
                 URL.revokeObjectURL(url);
@@ -25,25 +26,36 @@ export function FilePreview({ arrayBuffer, name, type, onClose }: FilePreviewPro
         }
     }, [arrayBuffer]);
 
+    const handleCloseButton = (event: FormEvent<HTMLButtonElement>) => { 
+        event.preventDefault()
+        onClose?.()
+    }
+
     return (
-        <div className='flex flex-col justify-between align-center' style={{ width: '75px'}}>
+        <div className='flex flex-col justify-between align-center' style={{ width: '75px' }} title={name}>
             <div className='ml-auto px-1 relative top-4 left-2'>
-                <CloseButton onClick={onClose} />
+                <CloseButton onClick={handleCloseButton} />
             </div>
-            {pdfUrl ? (
+            {fileUrl ? type.includes('pdf') ? (
                 <object
                     width='100%'
                     height='100%'
                     style={{ width: '75px', height: '75px', pointerEvents: 'none', borderRadius: 12 }}
-                    data={pdfUrl}
+                    data={fileUrl}
                     type={type}
                 >
-                    <TurnicatedText content={name} maxLength={20}/>
+                    <TurnicatedText content={name} maxLength={20} />
                 </object>
-            ) : (
+            ) 
+            : (
+                <div className='flex justify-center items-center bg-muted' style={{ width: '75px', height: '75px', borderRadius: 12 }}>
+                    <IconFile />
+                </div>
+            ) 
+            : (
                 <>{spinner}</>
             )}
-            <p className='truncate ...'>{name}</p>
+            <p className='text-xs truncate ...' title={name}>{name}</p>
         </div>
     );
 }

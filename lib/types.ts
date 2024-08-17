@@ -5,7 +5,7 @@ export type Message = {
 } | { 
   id: string, 
   type: 'file'
-  content: FileData
+  content: { name: string, type: string }
 }
 
 export interface Chat extends Record<string, any> {

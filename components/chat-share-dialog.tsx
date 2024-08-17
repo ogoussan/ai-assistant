@@ -50,8 +50,8 @@ export function ChatShareDialog({
   return (
     <Dialog {...props}>
       <DialogContent>
+        <DialogTitle>Share link to chat</DialogTitle>
         <DialogHeader>
-          <DialogTitle>Share link to chat</DialogTitle>
           <DialogDescription>
             Anyone with the URL will be able to view the shared chat.
           </DialogDescription>
