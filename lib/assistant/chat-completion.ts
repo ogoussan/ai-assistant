@@ -36,10 +36,10 @@ export async function respondToUserMessage(message: Message, previousMessages: M
 function getHistoryFromMessages(messasges: Message[]) {
     const messageHistory = new ChatMessageHistory()
     
-    messasges.forEach(({role, content}) => {
-        role === 'assistant' 
+    messasges.forEach(({type, content}) => {
+        type === 'assistant' 
             ? messageHistory.addAIMessage(content) 
-            : role === 'user' 
+            : type === 'user' 
             ? messageHistory.addUserMessage(content) 
             : null
     })
