@@ -61,3 +61,9 @@ export interface FileData {
   name: string,
   type: string,
 }
+
+export interface BucketParams {
+  Bucket: string,
+  Key: string,
+  Body: string,
+}
