@@ -80,7 +80,6 @@ export function useChatMessages(chatId: string,  userId?: string) {
             })
         }
         formData.append('message', content)
-        formData.append('userId', userId || '')
         formData.append('previousMessages', JSON.stringify(messages))
         formData.append('chatId', chatId)
     

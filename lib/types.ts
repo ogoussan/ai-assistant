@@ -57,13 +57,23 @@ export interface WebSearchResult {
 }
 
 export interface FileData {
-  arrayBuffer: ArrayBuffer,
+  key: string,
   name: string,
   type: string,
+  arrayBuffer?: ArrayBuffer,
+  size?: number,
+  lastModified?: Date,
 }
 
 export interface BucketParams {
   Bucket: string,
   Key: string,
   Body: string,
+}
+
+export interface Folder {
+  path: string,
+  files: FileData[],
+  parentFolder: Folder | null,
+  subfolders: Folder[],
 }

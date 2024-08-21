@@ -5,10 +5,15 @@ import { nanoid } from "@/lib/utils";
 import { FileData, Message } from "@/lib/types";
 import { Document } from "langchain/document";
 import { uploadFile } from "@/lib/knowledge-base/s3";
+import { auth } from "@/auth";
 
 const MAX_FILE_CONTENT_LENGTH = 20_000
 
 export const chatHandler = async (request: Request) => {
+
+    const session = await auth()
+    const userId = session?.user?.id
+
     try {
         const contentType = request.headers.get('Content-Type') || '';
         if (contentType.includes('multipart/form-data')) {
@@ -16,7 +21,6 @@ export const chatHandler = async (request: Request) => {
             
             const previousMessages = JSON.parse(formData.get('previousMessages') as string) as Message[]
             const chatId = formData.get('chatId') as string
-            const userId = formData.get('userId') as string
             const files = formData.getAll('files') as Blob[]
 
             let documents: Document[] = [];

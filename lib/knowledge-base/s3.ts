@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, CopyObjectCommand } from '@aws-sdk/client-s3';
 import { Progress, Upload } from '@aws-sdk/lib-storage';
 import { FileData } from '../types';
 
@@ -19,6 +19,10 @@ export const uploadFile = async (
 ) => {
   console.log('Uploading file to S3');
   const { name, arrayBuffer, type } = file;
+
+  if (!arrayBuffer) {
+    throw new Error('Array buffer is required');
+  }
   
   // Include userId in the S3 key
   const key = `${userId}/${name}`;
@@ -57,7 +61,7 @@ export const downloadFile = async (userId: string, fileName: string) => {
     return body;
   };
 
-  export const deleteFile = async (userId: string, fileName: string) => {
+export const deleteFile = async (userId: string, fileName: string) => {
   const key = `${userId}/${fileName}`;
   
   const deleteParams = {
@@ -68,4 +72,38 @@ export const downloadFile = async (userId: string, fileName: string) => {
   return s3Client.send(new DeleteObjectCommand(deleteParams));
 };
 
+export const listUserFiles = async (userId: string): Promise<FileData[]> => {
+  const keyPrefix = `${userId}/`;
 
+  const listParams = {
+    Bucket,
+    Prefix: keyPrefix,
+  };
+
+  const data = await s3Client.send(new ListObjectsV2Command(listParams));
+
+  return data.Contents?.map(item => ({
+    key: item.Key!,
+    name: item.Key?.split(userId+'/').pop() ?? '',
+    size: item.Size,
+    type: item.Key?.split('.').pop() ?? '',
+    lastModified: item.LastModified,
+   })) || [];
+};
+
+export const moveFile = async (oldPath: string, newPath: string) => {
+  // Copy the file to the new location
+  await s3Client.send(new CopyObjectCommand({
+    Bucket,
+    CopySource: `${Bucket}/${oldPath}`,
+    Key: `${newPath}/${oldPath.split('/').pop()}`,
+  }));
+
+  // Delete the original file
+  await s3Client.send(new DeleteObjectCommand({
+    Bucket,
+    Key: oldPath,
+  }));
+
+  return { sourceKey: oldPath, destinationKey: newPath };
+};
