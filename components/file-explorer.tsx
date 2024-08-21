@@ -111,13 +111,13 @@ export function FileExplorer({ files, userId }: { files: FileData[], userId: str
       <div className="flex flex-col gap-2 overflow-y-scroll pr-4 pb-8">
         {filteredAndSortedFiles.map((file) => (
           <motion.div
+            key={file.key}
             className="flex justify-end mt-auto"
             initial={{ opacity: 0, display: 'none', translateY: 10 }}
             animate={{ opacity: 1, display: 'flex', translateY: 0 }}
             transition={{ duration: 0.4 }}
           >
             <FileItem
-              key={file.key}
               name={file.name.split('.').slice(0, -1).join('.')}
               type={file.type}
               term={searchQuery}
