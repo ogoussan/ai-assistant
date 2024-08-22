@@ -37,6 +37,7 @@ export function FileDropOver({ open, onDragEnter, onDragLeave, onDrop }: FileDro
                 const arrayBuffer = await file.arrayBuffer();
 
                 const fileData: FileData = {
+                    key: file.name,
                     arrayBuffer,
                     name: file.name,
                     type: file.type,
