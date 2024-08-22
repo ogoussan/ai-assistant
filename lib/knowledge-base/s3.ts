@@ -1,6 +1,7 @@
 import { S3Client, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, CopyObjectCommand } from '@aws-sdk/client-s3';
 import { Progress, Upload } from '@aws-sdk/lib-storage';
-import { FileData } from '../types';
+import { FileData, Folder } from '../types';
+import { aggregateFoldersRecursively, formatFileNameFromKey, getFileExtensionFromKey } from '../utils';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION,
@@ -24,8 +25,7 @@ export const uploadFile = async (
     throw new Error('Array buffer is required');
   }
   
-  // Include userId in the S3 key
-  const key = `${userId}/${name}`;
+  const key = `${userId}/[${name}]`;
 
   const upload = new Upload({
     client: s3Client,
@@ -72,7 +72,7 @@ export const deleteFile = async (userId: string, fileName: string) => {
   return s3Client.send(new DeleteObjectCommand(deleteParams));
 };
 
-export const listUserFiles = async (userId: string): Promise<FileData[]> => {
+export const fetchFileStructure = async (userId: string): Promise<Folder> => {
   const keyPrefix = `${userId}/`;
 
   const listParams = {
@@ -82,13 +82,17 @@ export const listUserFiles = async (userId: string): Promise<FileData[]> => {
 
   const data = await s3Client.send(new ListObjectsV2Command(listParams));
 
-  return data.Contents?.map(item => ({
+  const files: FileData[] | undefined = data.Contents?.map(item => ({
     key: item.Key!,
-    name: item.Key?.split(userId+'/').pop() ?? '',
+    name: formatFileNameFromKey(item.Key ||  '') || '',
     size: item.Size,
-    type: item.Key?.split('.').pop() ?? '',
+    type: getFileExtensionFromKey(item.Key || '') || '',
     lastModified: item.LastModified,
-   })) || [];
+   }))
+
+  
+   const rootFolder = aggregateFoldersRecursively(files || [])
+   return rootFolder
 };
 
 export const moveFile = async (oldPath: string, newPath: string) => {

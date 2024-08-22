@@ -72,8 +72,8 @@ export interface BucketParams {
 }
 
 export interface Folder {
+  name: string,
   path: string,
   files: FileData[],
-  parentFolder: Folder | null,
   subfolders: Folder[],
 }

@@ -1,17 +1,24 @@
 'use server'
 
 import { auth } from "@/auth"
-import { listUserFiles, moveFile } from "@/lib/knowledge-base/s3"
-import { FileData } from "@/lib/types"
+import { fetchFileStructure, moveFile } from "@/lib/knowledge-base/s3"
+import { Folder } from "@/lib/types"
 import { Session } from "next-auth"
 
-export async function listFiles(): Promise<FileData[]> {
+
+export async function fetchRootFolder(): Promise<Folder> {
   const session = (await auth()) as Session
   const userId = session.user?.id
+  const emptyFolder = {
+    name: 'home',
+    path: 'home',
+    files: [],
+    subfolders: [],
+  }
 
-  return (userId 
-    ?  ((await listUserFiles(userId)).filter(Boolean)).map((file: FileData) => file) 
-    : [])
+  if (!userId) return emptyFolder
+
+  return fetchFileStructure(userId)
 }
 
 export async function moveFiles(oldPaths: string[], newPath: string) {
