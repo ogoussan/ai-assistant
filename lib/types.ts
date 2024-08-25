@@ -62,7 +62,7 @@ export interface FileData {
   key: string,
   name: string,
   type: string,
-  arrayBuffer?: ArrayBuffer,
+  arrayBuffer: ArrayBuffer,
 }
 
 interface FileExplorerBase {
