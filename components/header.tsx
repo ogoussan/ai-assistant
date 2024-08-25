@@ -7,15 +7,14 @@ import {
   IconNextChat,
   IconSeparator,
 } from '@/components/ui/icons'
-import { FolderIcon } from 'lucide-react'
 import { UserMenu } from '@/components/user-menu'
 import { SidebarMobile } from './sidebar-mobile'
 import { ChatHistory } from './chat-history'
 import { Session } from '@/lib/types'
-import { fetchRootFolder } from '@/app/files/actions'
-import { FileExplorer } from './file-explorer'
+import { FolderIcon } from "lucide-react";
+import { FileExplorer } from "./file-explorer";
 
-async function UserOrLogin() {
+async function HistorySidebar() {
   const session = (await auth()) as Session
   return (
     <>
@@ -45,30 +44,28 @@ async function UserOrLogin() {
   )
 }
 
-async function FileMenu({userId}: {userId: string}) {
-  const rootFolder = await fetchRootFolder()
-
-  return (
-    <>
-      <SidebarMobile icon={<FolderIcon />} side="right">
-        <FileExplorer rootFolder={rootFolder} userId={userId} />
-      </SidebarMobile>
-    </>
-  )
+async function FileExplorerSidebar({ userId }: {userId?: string}) {
+  return userId ? (
+    <SidebarMobile icon={<FolderIcon />} side="right">
+      <FileExplorer  userId={userId}/>
+    </SidebarMobile>
+  ) : (<FolderIcon className='opacity-50 cursor-not-allowed' />)
 }
 
 export async function Header() {
   const session = await auth()
-  const userId = session?.user?.id
+  const userId = session?.user?.id  
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl">
       <div className="flex items-center">
         <React.Suspense fallback={<div className="flex-1 overflow-auto" />}>
-          <UserOrLogin />
+          <HistorySidebar />
         </React.Suspense>
-      </div>  
-      {userId ? <FileMenu userId={userId} /> : null}
+      </div>
+      <React.Suspense fallback={<div className="flex-1 overflow-auto" />}>
+        <FileExplorerSidebar userId={userId} />
+      </React.Suspense>
     </header>
   )
 }

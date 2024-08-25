@@ -1,7 +1,7 @@
-import { S3Client, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, CopyObjectCommand } from '@aws-sdk/client-s3';
-import { Progress, Upload } from '@aws-sdk/lib-storage';
-import { FileData, Folder } from '../types';
-import { aggregateFoldersRecursively, formatFileNameFromKey, getFileExtensionFromKey } from '../utils';
+'use server'
+import { S3Client, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, CopyObjectCommand } from '@aws-sdk/client-s3'
+import { Progress, Upload } from '@aws-sdk/lib-storage'
+import { FileData } from '../types'
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION,
@@ -9,23 +9,24 @@ const s3Client = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
-});
+})
 
-const Bucket = process.env.AWS_S3_BUCKET!;
+const Bucket = process.env.AWS_S3_BUCKET!
 
 export const uploadFile = async (
-  file: FileData, 
-  userId: string, 
+  file: FileData,
+  userId: string,
   onProgress?: (progress: Progress) => void
 ) => {
-  console.log('Uploading file to S3');
-  const { name, arrayBuffer, type } = file;
+  const { name, arrayBuffer, type } = file
 
   if (!arrayBuffer) {
-    throw new Error('Array buffer is required');
+    throw new Error('Array buffer is required')
   }
-  
-  const key = `${userId}/[${name}]`;
+
+  const key = `${userId}/${_s3SanitizeFileName(name)}`
+
+  console.log(`[S3 Operation]: Uploading ${key}`)
 
   const upload = new Upload({
     client: s3Client,
@@ -38,32 +39,28 @@ export const uploadFile = async (
   });
 
   upload.on('httpUploadProgress', (progress) => {
-    onProgress?.(progress);
+    onProgress?.(progress)
   });
 
-  const data = await upload.done();
+  const data = await upload.done()
 
-  return data;
+  return data
 };
 
-export const downloadFile = async (userId: string, fileName: string) => {
-    const key = `${userId}/${fileName}`;
-    
-    const body = (
-      await s3Client.send(
-        new GetObjectCommand({
-          Bucket,
-          Key: key,
-        })
-      )
-    ).Body;
-  
-    return body;
-  };
+export const downloadObject = async (path: string) => {
+  return (
+    await s3Client.send(
+      new GetObjectCommand({
+        Bucket,
+        Key: path,
+      })
+    )
+  ).Body
+};
 
-export const deleteFile = async (userId: string, fileName: string) => {
+export const deleteObject = async (userId: string, fileName: string) => {
   const key = `${userId}/${fileName}`;
-  
+
   const deleteParams = {
     Bucket,
     Key: key,
@@ -72,42 +69,56 @@ export const deleteFile = async (userId: string, fileName: string) => {
   return s3Client.send(new DeleteObjectCommand(deleteParams));
 };
 
-export const fetchFileStructure = async (userId: string): Promise<Folder> => {
-  const keyPrefix = `${userId}/`;
+export const fetchObjectPaths = async (prefix?: string): Promise<string[]> => {
 
   const listParams = {
     Bucket,
-    Prefix: keyPrefix,
+    Prefix: prefix,
   };
 
-  const data = await s3Client.send(new ListObjectsV2Command(listParams));
+  console.log('[S3 Operation]: Fetching objects...')
 
-  const files: FileData[] | undefined = data.Contents?.map(item => ({
-    key: item.Key!,
-    name: formatFileNameFromKey(item.Key ||  '') || '',
-    size: item.Size,
-    type: getFileExtensionFromKey(item.Key || '') || '',
-    lastModified: item.LastModified,
-   }))
+  let objectPaths: string[] = [];
 
-  
-   const rootFolder = aggregateFoldersRecursively(files || [])
-   return rootFolder
+  try {
+    const data = await s3Client.send(new ListObjectsV2Command(listParams))
+    objectPaths = data.Contents?.map(item => (item.Key!)) || []
+  } catch (e) {
+    console.error(`[S3] Fetching objects failed: ${e}`)
+  }
+
+  console.log(`[S3 Operation]: Retrieved paths \n ${objectPaths}`)
+
+  return objectPaths;
 };
 
-export const moveFile = async (oldPath: string, newPath: string) => {
-  // Copy the file to the new location
+export const moveObject = async (sourcePath: string, destinationPath: string, fileName: string) => {
+  const sanitizedFileName = _s3SanitizeFileName(fileName);
   await s3Client.send(new CopyObjectCommand({
     Bucket,
-    CopySource: `${Bucket}/${oldPath}`,
-    Key: `${newPath}/${oldPath.split('/').pop()}`,
+    CopySource: `${Bucket}/${sourcePath}`,
+    Key: `${destinationPath}/${sanitizedFileName}`,
   }));
 
-  // Delete the original file
+  console.log(`[S3 Operation]: Moving ${sourcePath} to ${destinationPath}/${fileName}`)
+
   await s3Client.send(new DeleteObjectCommand({
     Bucket,
-    Key: oldPath,
+    Key: sourcePath,
   }));
 
-  return { sourceKey: oldPath, destinationKey: newPath };
-};
+  return { sourceKey: sourcePath, destinationKey: destinationPath };
+}
+
+const _s3SanitizeFileName = (fileName: string) => {
+  const umlautsMap = {
+    'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss',
+    'Ä': 'Ae', 'Ö': 'Oe', 'Ü': 'Ue'
+  };
+
+  let filename = fileName.replace(/[äöüßÄÖÜ]/g, char => umlautsMap[char] || '');
+  filename = filename.replace(/[^a-zA-Z0-9_\-./]/g, '')
+  filename = filename.replace(/\s+/g, '_')
+
+  return filename;
+}

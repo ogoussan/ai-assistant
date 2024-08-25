@@ -1,3 +1,5 @@
+import { FileExplorer } from "@/components/file-explorer"
+
 export type Message = {
   id: string
   type: 'system' | 'user' | 'assistant' | 'tool'
@@ -61,19 +63,22 @@ export interface FileData {
   name: string,
   type: string,
   arrayBuffer?: ArrayBuffer,
-  size?: number,
-  lastModified?: Date,
 }
 
-export interface BucketParams {
-  Bucket: string,
-  Key: string,
-  Body: string,
-}
-
-export interface Folder {
-  name: string,
+interface FileExplorerBase {
+  type: 'file' | 'folder',
   path: string,
-  files: FileData[],
-  subfolders: Folder[],
+  name: string,
 }
+
+export interface FileExplorerFile extends FileExplorerBase {
+  type: 'file'
+}
+
+export interface FileExplorerFolder extends FileExplorerBase {
+  type: 'folder'
+  files: FileExplorerFile[]
+  folders: FileExplorerFolder[]
+}
+
+export type FileExplorerItem = FileExplorerFolder | FileExplorerFile

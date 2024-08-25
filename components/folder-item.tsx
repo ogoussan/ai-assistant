@@ -25,7 +25,7 @@ const FolderItem = ({ name, term, selected, onSelect, onClick, alwaysShowCheckbo
     }, [term]);
 
     return (
-        <div className="flex items-center gap-3 rounded-md bg-muted p-2 w-full group" onClick={() => onClick()}>
+        <div className="flex items-center gap-3 rounded-md bg-muted p-2 w-full group cursor-pointer" onClick={() => onClick()}>
             <div className="rounded-md p-2 bg-[#c7861e] text-primary-foreground">
                 <FolderIcon />
             </div>

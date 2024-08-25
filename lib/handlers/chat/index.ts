@@ -29,9 +29,10 @@ export const chatHandler = async (request: Request) => {
                 const pdfFile = files.find(file => file.type === 'application/pdf');
                 const fileName = (pdfFile as any).name;
                 const file: FileData = {
+                    key: userId || '',
                     arrayBuffer: await pdfFile!.arrayBuffer(),
                     name: fileName,
-                    type: 'application/pdf',
+                    type: 'pdf',
                 }
 
                 if (pdfFile) {
@@ -43,7 +44,6 @@ export const chatHandler = async (request: Request) => {
                         const result = await uploadFile(file, userId)
                         console.log('File uploaded successfully:', result)
                     }
-                    
                 } else {
                     return NextResponse.json(
                         { message: 'Invalid file type. Please upload a PDF.' },
