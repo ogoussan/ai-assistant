@@ -32,14 +32,9 @@ export function FileExplorer({ userId }: { userId: string }) {
 
   useEffect(() => {
     if (displayStatus === 'create-folder')
-      inputElement.current?.focus()
-      inputElement.current?.select()
-  }, [displayStatus]);
-
-  useEffect(() => {
-    if (displayStatus) {
       setNewFolderName(NEW_FOLDER_NAME)
-    }
+    inputElement.current?.focus()
+    inputElement.current?.select()
   }, [displayStatus])
 
   const handleNewFolderNameSubmit: KeyboardEventHandler<HTMLInputElement> = (e) => {
@@ -49,11 +44,11 @@ export function FileExplorer({ userId }: { userId: string }) {
   }
 
   const saveNewFolder = () => {
-    const destinationPath = `${navigationFolderStack[navigationFolderStack.length - 1].path}/${newFolderName}` 
-      moveItems(destinationPath).finally(() => {
-        setDisplayStatus('standard')
-        clearSelectedItems()
-      })
+    const destinationPath = `${navigationFolderStack[navigationFolderStack.length - 1].path}/${newFolderName}`
+    moveItems(destinationPath).finally(() => {
+      setDisplayStatus('standard')
+      clearSelectedItems()
+    })
   }
 
   if (displayStatus === 'create-folder') {
@@ -83,17 +78,17 @@ export function FileExplorer({ userId }: { userId: string }) {
             return (
               <div className="opacity-60" key={path}>
                 {type === 'file' ? (
-                  <FileItem 
-                    name={name.split('.').slice(0, -1).join('.')} 
-                    type={name.split('.').pop()!} 
-                    disableCheckbox 
+                  <FileItem
+                    name={name.split('.').slice(0, -1).join('.')}
+                    type={name.split('.').pop()!}
+                    disableCheckbox
                   />
-                  ) : (
-                    <FolderItem 
-                      name={name} 
-                      disableCheckbox 
+                ) : (
+                  <FolderItem
+                    name={name}
+                    disableCheckbox
                   />
-                  )}
+                )}
               </div>
             )
           })}
@@ -114,14 +109,6 @@ export function FileExplorer({ userId }: { userId: string }) {
 
   return (
     <>
-      {selectedItems.length > 0 && (
-        <Button className=" absolute top-2 mr-auto" variant="ghost" onClick={() => {
-          clearSelectedItems()
-          setDisplayStatus('standard')
-        }}>
-          <div className="text-m">Cancel</div>
-        </Button>
-      )}
       <div className="flex flex-col h-screen overflow-hidden gap-4 mt-[3rem] mx-2">
         <div className="relative pr-4">
           <Input
@@ -133,33 +120,43 @@ export function FileExplorer({ userId }: { userId: string }) {
           <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
         {!searchQuery.trim() && (
-          <Breadcrumb>
-          <BreadcrumbList>
-            {navigationFolderStack.map((folder, index) => (
-              <>
-                <BreadcrumbItem className="cursor-pointer" key={folder?.path} onClick={() => {
-                  if (index + 1 !== navigationFolderStack.length) {
-                    if (displayStatus !== 'move') {
-                      clearSelectedItems()
-                    }
-                    
-                    navigateToFolderAt(index)
-                  }
-                }}>{index === navigationFolderStack.length - 1 ? (
-                  <BreadcrumbPage>
-                    <small>
-                      <b>{folder?.name}</b>
-                    </small>
-                  </BreadcrumbPage>
-                ) : (<small>{folder?.name}</small>)}</BreadcrumbItem>
-                {index < navigationFolderStack.length - 1 && <BreadcrumbSeparator />}
-              </>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
+          <div className="bg-muted mr-4 px-2 rounded-md">
+            <Breadcrumb>
+              <BreadcrumbList>
+                {navigationFolderStack.map((folder, index) => (
+                  <>
+                    <BreadcrumbItem className="cursor-pointer" key={folder?.path} onClick={() => {
+                      if (index + 1 !== navigationFolderStack.length) {
+                        if (displayStatus !== 'move') {
+                          clearSelectedItems()
+                        }
+
+                        navigateToFolderAt(index)
+                      }
+                    }}>{index === navigationFolderStack.length - 1 ? (
+                      <BreadcrumbPage>
+                        <small>
+                          <b>{folder?.name}</b>
+                        </small>
+                      </BreadcrumbPage>
+                    ) : (<small>{folder?.name}</small>)}</BreadcrumbItem>
+                    {index < navigationFolderStack.length - 1 && <BreadcrumbSeparator />}
+                  </>
+                ))}
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
         )}
         {(
           <div className="flex flex-col gap-2 overflow-y-scroll pr-4">
+            {selectedItems.length > 0 && (
+              <Button className="ml-auto p-0" variant="ghost" onClick={() => {
+                clearSelectedItems()
+                setDisplayStatus('standard')
+              }}>
+                <small className="text-xs">clear select</small>
+              </Button>
+            )}
             {visibleItems.map((item) => (
               item.type === 'folder' ? (
                 <motion.div
@@ -226,7 +223,7 @@ export function FileExplorer({ userId }: { userId: string }) {
         <motion.div
           className="flex pr-4"
           initial={{ opacity: 0, display: 'none', translateY: 10 }}
-          animate={selectedItems.length ? 'visible' : 'hidden'}
+          animate={selectedItems.length && displayStatus === 'standard' ? 'visible' : 'hidden'}
           variants={{
             visible: { opacity: 1, display: 'flex', translateY: 0 },
             hidden: { opacity: 0, display: 'none', translateY: 10 },
@@ -236,7 +233,7 @@ export function FileExplorer({ userId }: { userId: string }) {
             setDisplayStatus('create-folder');
           }}>
             <FolderPlusIcon className="mr-2" />
-            Create a folder
+            Add to new folder
           </Button>
         </motion.div>
         <motion.div
@@ -266,7 +263,7 @@ export function FileExplorer({ userId }: { userId: string }) {
             clearSelectedItems()
             setDisplayStatus('standard')
           }}>
-            Cancel
+            Cancel select
           </Button>
         </motion.div>
       </div>

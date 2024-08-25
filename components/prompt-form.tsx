@@ -49,7 +49,7 @@ export function PromptForm({
     if (file) {
       const { name, type } = file;
       const arrayBuffer = await file.arrayBuffer();
-      const fileData = { name, arrayBuffer, type };
+      const fileData = { name, arrayBuffer, type, key: '' };
       setFiles((prev) => [...prev, fileData]);
     }
   };
@@ -79,7 +79,7 @@ export function PromptForm({
       <form ref={formRef} onSubmit={handleSubmit}>
         <div className="flex gap-4 px-4 overflow-x-scroll">
           {files.map(({ arrayBuffer, name, type }, index) => (
-            <FilePreview key={index} arrayBuffer={arrayBuffer} name={name} type={type} onClose={() => removeFile(index)} />
+            <FilePreview key={index} arrayBuffer={arrayBuffer!} name={name} type={type} onClose={() => removeFile(index)} />
           ))}
         </div>
         <div className="relative flex flex-row items-end gap-4 max-h-60 w-full grow overflow-hidden bg-background px-4 py-4 sm:rounded-md">
