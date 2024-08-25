@@ -12,13 +12,13 @@ interface FileItemProps {
     disableCheckbox?: boolean;
 }
 
-const FileItem = ({ name, type, term, selected, onSelect, alwaysShowCheckbox, disableCheckbox }: FileItemProps) => {
+const FileItem = ({ name, type, term = '', selected, onSelect, alwaysShowCheckbox, disableCheckbox }: FileItemProps) => {
     const fileNameSpanRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (fileNameSpanRef.current) {
             const text = fileNameSpanRef.current.textContent;
-            const replaced = text?.replace(term || '', `<b>${term || ''}</b>`);
+            const replaced = text?.replace(term, `<b>${term || ''}</b>`);
             fileNameSpanRef.current.innerHTML = replaced || "";
         }
     }, [term]);

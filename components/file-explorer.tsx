@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from "react"
+import { KeyboardEventHandler, useEffect, useRef, useState } from "react"
 import { ChevronLeftIcon, FolderIcon, FolderInputIcon, FolderPlusIcon, ImportIcon, SaveIcon, SearchIcon } from "lucide-react"
 import { Input } from "./ui/input"
 import FileItem from "./file-item"
@@ -28,13 +28,33 @@ export function FileExplorer({ userId }: { userId: string }) {
   } = useFileExplorer(userId)
   const [displayStatus, setDisplayStatus] = useState<DisplayStatus>('standard')
   const [newFolderName, setNewFolderName] = useState(NEW_FOLDER_NAME)
+  const inputElement = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (displayStatus === 'create-folder')
+      inputElement.current?.focus()
+      inputElement.current?.select()
+  }, [displayStatus]);
 
   useEffect(() => {
     if (displayStatus) {
       setNewFolderName(NEW_FOLDER_NAME)
     }
   }, [displayStatus])
+
+  const handleNewFolderNameSubmit: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === 'Enter') {
+      saveNewFolder()
+    }
+  }
+
+  const saveNewFolder = () => {
+    const destinationPath = `${navigationFolderStack[navigationFolderStack.length - 1].path}/${newFolderName}` 
+      moveItems(destinationPath).finally(() => {
+        setDisplayStatus('standard')
+        clearSelectedItems()
+      })
+  }
 
   if (displayStatus === 'create-folder') {
     return (
@@ -49,18 +69,31 @@ export function FileExplorer({ userId }: { userId: string }) {
         <div className="flex flex-col h-screen overflow-hidden gap-4 mt-[3rem] mx-2">
           <div className="relative pr-4">
             <Input
+              ref={inputElement}
               placeholder="Folder name"
               className="pl-10"
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
+              onKeyDown={handleNewFolderNameSubmit}
             />
             <FolderIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
-          {selectedItems.map(({ name, path }) => {
+          {selectedItems.map(({ name, path, type }) => {
 
             return (
               <div className="opacity-60" key={path}>
-                <FileItem name={name.split('.').slice(0, -1).join('.')} type={name.split('.').pop()!} disableCheckbox />
+                {type === 'file' ? (
+                  <FileItem 
+                    name={name.split('.').slice(0, -1).join('.')} 
+                    type={name.split('.').pop()!} 
+                    disableCheckbox 
+                  />
+                  ) : (
+                    <FolderItem 
+                      name={name} 
+                      disableCheckbox 
+                  />
+                  )}
               </div>
             )
           })}
@@ -70,7 +103,7 @@ export function FileExplorer({ userId }: { userId: string }) {
             animate={{ opacity: 1, display: 'flex', translateY: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <Button className="w-full" onClick={() => moveItems()}>
+            <Button className="w-full" onClick={saveNewFolder}>
               Save new folder
             </Button>
           </motion.div>
@@ -104,7 +137,7 @@ export function FileExplorer({ userId }: { userId: string }) {
           <BreadcrumbList>
             {navigationFolderStack.map((folder, index) => (
               <>
-                <BreadcrumbItem className="cursor-pointer" key={folder.path} onClick={() => {
+                <BreadcrumbItem className="cursor-pointer" key={folder?.path} onClick={() => {
                   if (index + 1 !== navigationFolderStack.length) {
                     if (displayStatus !== 'move') {
                       clearSelectedItems()
@@ -115,10 +148,10 @@ export function FileExplorer({ userId }: { userId: string }) {
                 }}>{index === navigationFolderStack.length - 1 ? (
                   <BreadcrumbPage>
                     <small>
-                      <b>{folder.name}</b>
+                      <b>{folder?.name}</b>
                     </small>
                   </BreadcrumbPage>
-                ) : (<small>{folder.name}</small>)}</BreadcrumbItem>
+                ) : (<small>{folder?.name}</small>)}</BreadcrumbItem>
                 {index < navigationFolderStack.length - 1 && <BreadcrumbSeparator />}
               </>
             ))}
@@ -140,7 +173,10 @@ export function FileExplorer({ userId }: { userId: string }) {
                     name={item.name}
                     term={searchQuery}
                     selected={isItemSelected(item.path)}
-                    onClick={() => navigateToFolder(item)}
+                    onClick={() => {
+                      navigateToFolder(item)
+                      setSearchQuery('')
+                    }}
                     onSelect={() => toggleSelectItem(item)}
                     alwaysShowCheckbox={!!selectedItems.length}
                   />
@@ -176,7 +212,13 @@ export function FileExplorer({ userId }: { userId: string }) {
           }}
         >
           <div className="text-nowrap text-xs font-bold">{selectedItems.length} item(s)</div>
-          <Button className="w-full" onClick={moveItems}>
+          <Button className="w-full" onClick={() => {
+            const destinationPath = `${navigationFolderStack[navigationFolderStack.length - 1].path}`
+            moveItems(destinationPath).finally(() => {
+              setDisplayStatus('standard')
+              clearSelectedItems()
+            })
+          }}>
             <ImportIcon className="mr-2" />
             Move here
           </Button>
