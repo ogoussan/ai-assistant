@@ -118,7 +118,7 @@ const _s3SanitizeFileName = (fileName: string) => {
   };
 
   let filename = fileName.replace(/[äöüßÄÖÜ]/g, char => umlautsMap[char] || '');
-  filename = filename.replace(/[^a-zA-Z0-9_\-./]/g, '')
+  filename = filename.replace(/[^a-zA-Z0-9_\-./ ]/g, '');
   filename = filename.replace(/\s+/g, '_')
 
   return filename;

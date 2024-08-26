@@ -111,7 +111,7 @@ const FileItem = ({ name, type, term = '', selected, onSelect, onRename, showChe
         setTimeout(() => {
           renameInputRef.current?.focus()
           renameInputRef.current?.select()
-        })
+        }, 100)
         break;
       case 'move':
         // TODO: Implement open
