@@ -22,7 +22,8 @@ export const useFileExplorer = (userId: string) => {
     const visibleItems = useMemo(() => searchQuery.trim() ? searchResultItems : immediateItems, [searchQuery, searchResultItems, immediateItems, items])
     const areAllSelected = useMemo(() => !!selectedItems.length && visibleItems.every((item) => selectedItems.map((_item) => _item.path).includes(item.path)), [selectedItems, visibleItems])
 
-    console.log('are all selected:', areAllSelected)
+    console.log('items', items)
+    console.log('visible items', visibleItems)
 
     useEffect(() => {
         fetchItems()
@@ -40,6 +41,7 @@ export const useFileExplorer = (userId: string) => {
 
     const fetchItems = async (): Promise<FileExplorerItem[]> => {
         const _items = await aggregateFileExplorerItems(userId)
+        console.log('fetching...')
         setItems(_items)
         return _items
     }
@@ -78,16 +80,25 @@ export const useFileExplorer = (userId: string) => {
         setSelectedItems([])
     }, [])
 
-    const mergePaths = (path1: string, path2: string) => {
-        const maxLength = Math.max(path1.split('/').length, path2.split('/').length)
-        const mergePathSegments: string[] = []
-
-        for(let i = 0; i < maxLength; i++) {
-            mergePathSegments.push(path1.split('/')[i] || path2.split('/')[i])
+    const renameItem = useCallback(async (item: FileExplorerItem, name: string) => {
+        if (item.name.split('.').slice(0, -1).join('.') === name) {
+            return
         }
 
-        return mergePathSegments.join('/')
-    }
+        if (item.type === 'file') {
+            const fileExtension = item.path.split('.').pop()!
+            const destinationPath = item.path
+                .split('/').filter(Boolean)
+                .slice(0, -1).join('/')
+            const fileName = `${name}.${fileExtension}`
+            
+            await moveObject(item.path, destinationPath, fileName)
+            const updatedItems = await fetchItems()
+            const updatedCurrentFolder = updatedItems
+                .find((item) => item.path === navigationFolderStack[navigationFolderStack.length-1].path) as FileExplorerFolder
+            setNavigationFolderStack((prev) => [...prev.slice(0, -1), updatedCurrentFolder])
+        }
+    }, [navigationFolderStack])
 
     const moveItems = useCallback(async (path: string) => {
         let sourcePaths: string[] = []
@@ -138,6 +149,7 @@ export const useFileExplorer = (userId: string) => {
         navigateToFolder,
         navigateToFolderAt,
         moveItems,
+        renameItem,
         searchQuery,
         setSearchQuery
     })

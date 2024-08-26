@@ -26,6 +26,7 @@ export function FileExplorer({ userId }: { userId: string }) {
     navigateToFolder,
     navigateToFolderAt,
     moveItems,
+    renameItem,
     searchQuery,
     setSearchQuery
   } = useFileExplorer(userId)
@@ -155,7 +156,8 @@ export function FileExplorer({ userId }: { userId: string }) {
               <Button className="ml-auto flex gap-2" variant="secondary" onClick={() => {
                 setIsSelectEnabled(true)
               }}>
-                <small className="text-xs">select items</small><SquareCheck size={16} opacity={0.5}/>
+                <small className="text-xs">select items</small>
+                <SquareCheck size={16} opacity={0.5}/>
               </Button>
             ) : (
               <motion.div 
@@ -168,7 +170,8 @@ export function FileExplorer({ userId }: { userId: string }) {
                   setIsSelectEnabled(false)
                   clearSelectedItems()
                 }}>
-                  <small className="text-xs">cancel select</small><CircleX size={16} opacity={0.5}/>
+                  <small className="text-xs">cancel select</small>
+                  <CircleX size={16} opacity={0.5}/>
                 </Button>
                 <div className="p-1 border-solid border-2 rounded-md">
                   <Checkbox checked={areAllSelected} onCheckedChange={(checked) => checked ? selectedAllItems() : clearSelectedItems()}/>
@@ -210,6 +213,7 @@ export function FileExplorer({ userId }: { userId: string }) {
                     term={searchQuery}
                     selected={isItemSelected(item.path)}
                     onSelect={() => toggleSelectItem(item)}
+                    onRename={(name) => renameItem(item, name)}
                     showCheckbox={isSelectEnabled}
                   />
                 </motion.div>
@@ -263,7 +267,10 @@ export function FileExplorer({ userId }: { userId: string }) {
             hidden: { opacity: 0, display: 'none', translateY: 10 },
           }}
         >
-          <Button className="w-full" variant='outline' onClick={() => setDisplayStatus('move')}>
+          <Button className="w-full" variant='outline' onClick={() => { 
+            setDisplayStatus('move');
+            setIsSelectEnabled(false)
+          }}>
             <FolderInputIcon className="mr-2" />
             Move to a folder
           </Button>

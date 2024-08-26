@@ -92,9 +92,9 @@ export const fetchObjectPaths = async (prefix?: string): Promise<string[]> => {
   return objectPaths;
 };
 
-export const moveObject = async (sourcePath: string, destinationPath: string) => {
+export const moveObject = async (sourcePath: string, destinationPath: string, newName?: string) => {
   const fileName = sourcePath.split('/').filter(Boolean).pop()!;
-  const sanitizedFileName = _s3SanitizeFileName(fileName);
+  const sanitizedFileName = _s3SanitizeFileName(newName || fileName);
   console.log(`[S3 Operation]: Moving ${sourcePath} to ${destinationPath}/${fileName}`)
   
   await s3Client.send(new CopyObjectCommand({
