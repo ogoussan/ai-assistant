@@ -8,11 +8,11 @@ interface FileItemProps {
     term?: string;
     selected?: boolean;
     onSelect?: (checked: boolean) => void;
-    alwaysShowCheckbox?: boolean;
-    disableCheckbox?: boolean;
+    onClick?: () => void;
+    showCheckbox?: boolean;
 }
 
-const FileItem = ({ name, type, term = '', selected, onSelect, alwaysShowCheckbox, disableCheckbox }: FileItemProps) => {
+const FileItem = ({ name, type, term = '', selected, onSelect, showCheckbox }: FileItemProps) => {
     const fileNameSpanRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -32,8 +32,12 @@ const FileItem = ({ name, type, term = '', selected, onSelect, alwaysShowCheckbo
                     <small title={name} className="text-nowrap text-ellipsis overflow-hidden ..." ref={fileNameSpanRef}>{name}</small>
                 <div className="text-xs text-muted-foreground">{type}</div>
             </div>
-            {!disableCheckbox && (
-                <Checkbox checked={selected} className={`${alwaysShowCheckbox ? 'opacity-100' : 'opacity-0'} group-hover:opacity-100 transition-opacity duration-300`} onCheckedChange={(checked) => onSelect?.(!!checked)} />
+            {showCheckbox && (
+                <Checkbox 
+                    checked={selected} 
+                    className='group-hover:opacity-100 transition-opacity duration-300' 
+                    onCheckedChange={(checked) => onSelect?.(!!checked)} 
+                />
             )}
         </div>
     )

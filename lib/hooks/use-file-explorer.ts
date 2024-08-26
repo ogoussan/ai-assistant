@@ -20,7 +20,9 @@ export const useFileExplorer = (userId: string) => {
         return results.map(result => result.item).sort()
     }, [items, searchQuery, fuseItems])
     const visibleItems = useMemo(() => searchQuery.trim() ? searchResultItems : immediateItems, [searchQuery, searchResultItems, immediateItems, items])
-    const isShowSearchResults = useMemo(() => searchQuery.trim(), [searchQuery])
+    const areAllSelected = useMemo(() => !!selectedItems.length && visibleItems.every((item) => selectedItems.map((_item) => _item.path).includes(item.path)), [selectedItems, visibleItems])
+
+    console.log('are all selected:', areAllSelected)
 
     useEffect(() => {
         fetchItems()
@@ -65,7 +67,14 @@ export const useFileExplorer = (userId: string) => {
 
     const isItemSelected = useCallback((itemPath: string) => selectedItems.some((selectedItem) => selectedItem.path === itemPath), [selectedItems])
 
+    const selectedAllItems = useCallback(() => {
+        console.log('select all', visibleItems)
+        setSelectedItems(visibleItems)
+    }, [visibleItems])
+
+
     const clearSelectedItems = useCallback(() => {
+        console.log('clear all items')
         setSelectedItems([])
     }, [])
 
@@ -119,10 +128,11 @@ export const useFileExplorer = (userId: string) => {
 
     return ({
         visibleItems,
-        isShowSearchResults,
         selectedItems,
         isItemSelected,
+        areAllSelected,
         toggleSelectItem,
+        selectedAllItems,
         clearSelectedItems,
         navigationFolderStack,
         navigateToFolder,
