@@ -23,10 +23,10 @@ const FolderItem = ({ name, term = '', selected, onSelect, onClick, showCheckbox
     }, [term]);
 
     return (
-        <div className="flex items-center gap-3 rounded-md bg-muted p-2 w-full group cursor-pointer" onClick={() => {
+        <div className="flex items-center gap-3 rounded-md bg-muted p-2 w-full group hover:bg-secondary/50 cursor-pointer" onClick={() => {
             showCheckbox ? onSelect?.(true) : onClick?.()
         }}>
-            <div className="rounded-md p-2 bg-[#c7861e] text-primary-foreground">
+            <div className="rounded-md p-2 bg-[#e9bb6f] text-primary-foreground">
                 <FolderIcon />
             </div>
             <div className="flex flex-col flex-1 min-w-0">
