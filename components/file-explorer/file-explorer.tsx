@@ -85,6 +85,15 @@ export function FileExplorer({ userId }: { userId: string }) {
     ...getButtonAnimationProps(selectedItems.length > 0 && displayStatus === 'move')
   }), [currentFolder, selectedItems, displayStatus])
 
+  const moveHereCancelButtonProps: FileExplorerButtonProps = useMemo(() => ({
+    onClick: () => {
+      clearSelectedItems()
+      setDisplayStatus('standard')
+    },
+    label: 'Cancel',
+    ...getButtonAnimationProps(selectedItems.length > 0 && displayStatus === 'move')
+  }), [currentFolder, selectedItems, displayStatus])
+
   const createFolderWithItemsButtonProps: FileExplorerButtonProps = useMemo(() => ({
     onClick: () => {
       setDisplayStatus('create-folder')
@@ -208,6 +217,7 @@ export function FileExplorer({ userId }: { userId: string }) {
         </div>
       )}
       <FileExplorerButton {...moveHereButtonProps} />
+      <FileExplorerButton {...moveHereCancelButtonProps} />
       <FileExplorerButton {...createFolderWithItemsButtonProps} />
       <FileExplorerButton {...moveSelectedItemProps} />
     </div>

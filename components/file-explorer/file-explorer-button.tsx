@@ -4,7 +4,7 @@ import { Button } from "../ui/button"
 
 export interface FileExplorerButtonProps extends AnimationProps {
     onClick: () => void,
-    icon: () => ReactNode,
+    icon?: () => ReactNode,
     leftContent?: () => ReactNode,
     rightContent?: () => ReactNode,
     label?: string,
@@ -38,7 +38,7 @@ export function FileExplorerButton({
                 variant="outline"
                 onClick={onClick}
             >
-                <ButtonIcon />
+                {ButtonIcon && <ButtonIcon />}
                 <small className="text-xs">{label}</small>
             </Button>
             {RightContent && <RightContent />}
