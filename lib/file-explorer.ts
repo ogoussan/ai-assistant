@@ -1,6 +1,7 @@
 import { HOME_DIRECTORY_NAME } from "@/constants/file-constants"
 import { fetchObjectPaths } from "./knowledge-base/s3"
 import { FileExplorerFile, FileExplorerFolder, FileExplorerItem } from "./types"
+import { formatPath, getNameFromPath, slicePath } from "./path.helper"
 
 export const aggregateFileExplorerItems = async (userId: string): Promise<FileExplorerItem[]> => {
     const objectPaths = await fetchObjectPaths(userId)
@@ -8,26 +9,26 @@ export const aggregateFileExplorerItems = async (userId: string): Promise<FileEx
         return ({
             type: 'file',
             path: objectPath,
-            name: objectPath.split('/').filter(Boolean).pop()!
+            name: getNameFromPath(objectPath)
         })
     })
 
     let folders: FileExplorerFolder[] = []
 
     files.forEach((file) => {
-        const directoryNames = file.path.split('/').filter(Boolean).slice(0, -1); 
+        const directoryNames = slicePath(file.path, 0, -1).split('/')
         directoryNames.forEach((directoryName, directoryIndex) => {
             const containsDirectoryNameInFolders = folders.some(
-                (folder) => folder.path.split('/').filter(Boolean)[directoryIndex] === directoryName
+                (folder) => formatPath(folder.path).split('/')[directoryIndex] === directoryName
             )
 
-            const path = file.path.split('/').filter(Boolean).slice(0, directoryIndex).join('/')
-            const isFileOfCurrentDirectory = file.path.split('/').filter(Boolean).length === directoryIndex + 2
+            const path = slicePath(file.path, 0, directoryIndex)
+            const isFileOfCurrentDirectory = formatPath(file.path).split('/').length === directoryIndex + 2
 
             if (!containsDirectoryNameInFolders) {
                 const newFolder: FileExplorerItem = { 
                     type: 'folder',
-                    path: `${path}/${directoryName}`.split('/').filter(Boolean).join('/'),
+                    path: formatPath(`${path}/${directoryName}`),
                     name: directoryIndex === 0 ? HOME_DIRECTORY_NAME : directoryName,
                     files: isFileOfCurrentDirectory 
                         ? [file] 
@@ -35,9 +36,9 @@ export const aggregateFileExplorerItems = async (userId: string): Promise<FileEx
                     folders: []
                 }
 
-                const previousDirectoryName = path.split('/').filter(Boolean).pop()
+                const previousDirectoryName = getNameFromPath(path)
                 const previousFolder = folders.find((folder) => {
-                    return folder.path.split('/').filter(Boolean)[directoryIndex - 1] === previousDirectoryName
+                    return formatPath(folder.path).split('/')[directoryIndex - 1] === previousDirectoryName
                 })
 
                 if (previousFolder) {
@@ -46,7 +47,7 @@ export const aggregateFileExplorerItems = async (userId: string): Promise<FileEx
 
                 folders = [...folders, newFolder]
             } else {
-                const folderPath = (`${path}/${directoryName}`).split('/').filter(Boolean).join('/')
+                const folderPath = formatPath(`${path}/${directoryName}`)
                 const folder = folders.find((folder) => folder.path === folderPath)
 
                 if (isFileOfCurrentDirectory && folder) {

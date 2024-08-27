@@ -1,7 +1,7 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { CloseButton } from './close-button';
 import { spinner } from './spinner'
-import { TurnicatedText } from './turnicate-text';
+import { TruncatedText  } from './truncate-text';
 import { IconFile } from './ui/icons';
 
 interface FilePreviewProps {
@@ -32,7 +32,11 @@ export function FilePreview({ arrayBuffer, name, type, onClose }: FilePreviewPro
     }
 
     return (
-        <div className='flex flex-col justify-between align-center' style={{ width: '75px' }} title={name}>
+        <div 
+            className='flex flex-col justify-between align-center' 
+            style={{ width: '75px' }} 
+            title={name}
+        >
             <div className='ml-auto px-1 relative top-4 left-2'>
                 <CloseButton onClick={handleCloseButton} />
             </div>
@@ -40,11 +44,16 @@ export function FilePreview({ arrayBuffer, name, type, onClose }: FilePreviewPro
                 <object
                     width='100%'
                     height='100%'
-                    style={{ width: '75px', height: '75px', pointerEvents: 'none', borderRadius: 12 }}
+                    style={{ 
+                        width: '75px', 
+                        height: '75px', 
+                        pointerEvents: 'none', 
+                        borderRadius: 12 
+                    }}
                     data={fileUrl}
                     type={type}
                 >
-                    <TurnicatedText content={name} maxLength={20} />
+                    <TruncatedText content={name} maxLength={20} />
                 </object>
             ) 
             : (

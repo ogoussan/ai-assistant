@@ -1,9 +1,9 @@
-interface TurnicatedText {
+interface TruncatedText {
     content: string,
     maxLength: number
 }
 
-export function TurnicatedText({content, maxLength}: TurnicatedText) {
+export function TruncatedText({content, maxLength}: TruncatedText) {
 
     return (
         <div className="text-md text-gray-500">

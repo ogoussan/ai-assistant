@@ -12,7 +12,7 @@ import { SidebarMobile } from './sidebar-mobile'
 import { ChatHistory } from './chat-history'
 import { Session } from '@/lib/types'
 import { FolderIcon } from "lucide-react";
-import { FileExplorer } from "./file-explorer";
+import { FileExplorer } from "./file-explorer/file-explorer";
 
 async function HistorySidebar() {
   const session = (await auth()) as Session
