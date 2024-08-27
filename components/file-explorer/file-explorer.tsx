@@ -210,6 +210,10 @@ export function FileExplorer({ userId }: { userId: string }) {
                 selected={isItemSelected(item.path)}
                 onSelect={() => toggleSelectItem(item)}
                 onRename={(name) => renameItem(item, name)}
+                onMove={() => {
+                  toggleSelectItem(item)
+                  setDisplayStatus('move')
+                }}
                 showCheckbox={isSelectEnabled}
               />
             </motion.div>

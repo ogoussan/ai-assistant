@@ -13,6 +13,7 @@ interface FileItemProps {
   onSelect?: (checked: boolean) => void;
   onClick?: () => void;
   onRename?: (name: string) => void;
+  onMove?: () => void;
   showCheckbox?: boolean;
 }
 
@@ -65,7 +66,7 @@ const FileItemOptionMenu = ({ onSelectMenuOption }: { onSelectMenuOption: (actio
   )
 }
 
-const FileItem = ({ name, type, term = '', selected, onSelect, onRename, showCheckbox }: FileItemProps) => {
+const FileItem = ({ name, type, term = '', selected, onSelect, onRename, onMove, showCheckbox }: FileItemProps) => {
   const fileNameSpanRef = useRef<HTMLDivElement>(null)
   const [renameInputValue, setRenameInputValue] = useState<string>()
   const renameInputRef = useRef<HTMLInputElement>(null)
@@ -114,7 +115,7 @@ const FileItem = ({ name, type, term = '', selected, onSelect, onRename, showChe
         }, 100)
         break;
       case 'move':
-        // TODO: Implement open
+        onMove?.()
         break;
       case 'delete':
         // TODO: Implement move
