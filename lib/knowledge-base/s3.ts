@@ -58,9 +58,7 @@ export const downloadObject = async (path: string) => {
   ).Body
 };
 
-export const deleteObject = async (userId: string, fileName: string) => {
-  const key = `${userId}/${fileName}`;
-
+export const deleteObject = async (key: string) => {
   const deleteParams = {
     Bucket,
     Key: key,

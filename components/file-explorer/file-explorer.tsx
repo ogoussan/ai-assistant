@@ -6,7 +6,8 @@ import {
   FolderPlusIcon,
   ImportIcon,
   SearchIcon,
-  SquareCheck
+  SquareCheck,
+  Trash2Icon
 } from "lucide-react"
 import { Input } from "../ui/input"
 import FileItem from "../file-item"
@@ -36,10 +37,14 @@ export function FileExplorer({ userId }: { userId: string }) {
     moveItems,
     renameItem,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    visibleFiles,
+    visibleFolders,
+    deleteItems,
   } = useFileExplorer(userId)
   const [displayStatus, setDisplayStatus] = useState<DisplayStatus>('standard')
-  const [isSelectEnabled, setIsSelectEnabled] = useState(false)
+  const [isSelecting, setIsSelecting] = useState(false)
+  const [isSelectionDisabled, setIsSelectionDisabled] = useState()
 
   const getButtonAnimationProps = (isVisible: boolean) => ({
     initial: {
@@ -106,10 +111,19 @@ export function FileExplorer({ userId }: { userId: string }) {
   const moveSelectedItemProps: FileExplorerButtonProps = useMemo(() => ({
     onClick: () => {
       setDisplayStatus('move')
-      setIsSelectEnabled(false)
+      setIsSelecting(false)
     },
     icon: () => <FolderInputIcon className="mr-2" />,
     label: 'Move to a folder',
+    ...getButtonAnimationProps(!!selectedItems.length && displayStatus !== 'move')
+  }), [currentFolder, selectedItems, displayStatus])
+
+  const deleteSelectedItemsProp: FileExplorerButtonProps = useMemo(() => ({
+    onClick: () => {
+      deleteItems()
+    },
+    icon: () => <Trash2Icon className="mr-2" />,
+    label: 'Delete',
     ...getButtonAnimationProps(!!selectedItems.length && displayStatus !== 'move')
   }), [currentFolder, selectedItems, displayStatus])
 
@@ -146,9 +160,9 @@ export function FileExplorer({ userId }: { userId: string }) {
       )}
       {(
         <div className="flex flex-col gap-2 overflow-y-scroll pr-4">
-          {!isSelectEnabled ? (
+          {!isSelectionDisabled && (!isSelecting ? (
             <Button className="ml-auto flex gap-2" variant="secondary" onClick={() => {
-              setIsSelectEnabled(true)
+              setIsSelecting(true)
             }}>
               <small className="text-xs">select items</small>
               <SquareCheck size={16} opacity={0.5} />
@@ -161,7 +175,7 @@ export function FileExplorer({ userId }: { userId: string }) {
               transition={{ duration: 0.2 }}
             >
               <Button className="ml-auto flex gap-2" variant="outline" onClick={() => {
-                setIsSelectEnabled(false)
+                setIsSelecting(false)
                 clearSelectedItems()
               }}>
                 <small className="text-xs">cancel select</small>
@@ -177,53 +191,58 @@ export function FileExplorer({ userId }: { userId: string }) {
                 />
               </div>
             </motion.div>
-          )}
-          {currentFolder?.folders.map((item) => (
-            <motion.div
-              key={item.path}
-              className="flex justify-end mt-auto"
-              {...itemAnimation}
-            >
-              <FolderItem
-                name={item.name}
-                term={searchQuery}
-                selected={isItemSelected(item.path)}
-                onClick={() => {
-                  navigateToFolder(item)
-                  setSearchQuery('')
-                }}
-                onSelect={() => toggleSelectItem(item)}
-                showCheckbox={isSelectEnabled}
-              />
-            </motion.div>
           ))}
-          {currentFolder?.files.map((item) => (
-            <motion.div
-              key={item.path}
-              className="flex justify-end mt-auto"
-              {...itemAnimation}
-            >
-              <FileItem
-                name={item.name}
-                type={item.type}
-                term={searchQuery}
-                selected={isItemSelected(item.path)}
-                onSelect={() => toggleSelectItem(item)}
-                onRename={(name) => renameItem(item, name)}
-                onMove={() => {
-                  toggleSelectItem(item)
-                  setDisplayStatus('move')
-                }}
-                showCheckbox={isSelectEnabled}
-              />
-            </motion.div>
-          ))}
+          {visibleFolders.map((item) => (
+              <motion.div
+                key={item.path}
+                className="flex justify-end mt-auto"
+                {...itemAnimation}
+              >
+                <FolderItem
+                  name={item.name}
+                  term={searchQuery}
+                  selected={isItemSelected(item.path)}
+                  onClick={() => {
+                    navigateToFolder(item)
+                    setSearchQuery('')
+                  }}
+                  onSelect={() => toggleSelectItem(item)}
+                  showCheckbox={isSelecting}
+                />
+              </motion.div>
+            ))}
+            {visibleFiles.map((item) => (
+                <motion.div
+                  key={item.path}
+                  className="flex justify-end mt-auto"
+                  {...itemAnimation}
+                >
+                  <FileItem
+                    name={item.name}
+                    type={item.type}
+                    term={searchQuery}
+                    selected={isItemSelected(item.path)}
+                    onSelect={() => toggleSelectItem(item)}
+                    onRename={(name) => renameItem(item, name)}
+                    onMove={() => {
+                      toggleSelectItem(item)
+                      setDisplayStatus('move')
+                      setIsSelecting(false)
+                    }}
+                    onDelete={() => {
+                      deleteItems([item])
+                    }}
+                    showCheckbox={isSelecting}
+                  />
+                </motion.div>
+              ))}
         </div>
       )}
       <FileExplorerButton {...moveHereButtonProps} />
       <FileExplorerButton {...moveHereCancelButtonProps} />
       <FileExplorerButton {...createFolderWithItemsButtonProps} />
       <FileExplorerButton {...moveSelectedItemProps} />
+      <FileExplorerButton {...deleteSelectedItemsProp} />
     </div>
   )
 }

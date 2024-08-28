@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { FileExplorerFolder, FileExplorerItem } from "../types"
 import { aggregateFileExplorerItems } from "../file-explorer"
 import Fuse from "fuse.js"
-import { moveObject } from "../knowledge-base/s3"
+import { deleteObject, moveObject } from "../knowledge-base/s3"
 import { slicePath, splitFileName } from "../path.helper"
 
 export const useFileExplorer = (userId: string) => {
@@ -33,12 +33,24 @@ export const useFileExplorer = (userId: string) => {
         const results = fuseItems.search(searchQuery)
         return results.map(result => result.item).sort()
     }, [totalItems, searchQuery, fuseItems])
+    const searchResultFiles = useMemo(() => searchResultItems.filter((item) => item.type === 'file'), [searchResultItems])
+    const searchResultFolders = useMemo(() => searchResultItems.filter((item) => item.type === 'folder'), [searchResultItems])
 
     // ITEM STATE (dependant on SEARCH STATE)
     const visibleItems = useMemo(() => searchQuery.trim()
         ? searchResultItems
         : folderItems,
     [searchQuery, searchResultItems, folderItems])
+
+    const visibleFiles = useMemo(() => searchQuery.length 
+        ? searchResultFiles 
+        : currentFolder?.files || [], 
+    [searchQuery, searchResultFolders, currentFolder])
+
+    const visibleFolders = useMemo(() => searchQuery.length 
+        ? searchResultFolders 
+        : currentFolder?.folders || [],
+    [searchQuery, searchResultFolders, currentFolder])
 
     // SELECTION STATE
     const [selectedItems, setSelectedItems] = useState<FileExplorerItem[]>([])
@@ -50,6 +62,7 @@ export const useFileExplorer = (userId: string) => {
                     .includes(item.path)
                 ),
         [selectedItems, visibleItems])
+
 
     useEffect(() => {
         fetchItems()
@@ -190,6 +203,48 @@ export const useFileExplorer = (userId: string) => {
         })
     }, [selectedItems])
 
+    const deleteItems = useCallback(async (items: FileExplorerItem[]) => {
+        const files = (items || selectedItems).filter((item) => item.type === 'file')
+        const folders = (items || selectedItems).filter((item) => item.type === 'folder')
+        const folderFiles: FileExplorerItem[] = []
+
+        folders.forEach((folder) => {
+            let currentFolder: FileExplorerFolder | undefined = folder
+            const folderStack: FileExplorerFolder[] = []
+
+            while(currentFolder) {
+                currentFolder!.folders.forEach((subFolder) => {
+                    folderStack.push(subFolder)
+                })
+
+                currentFolder!.files.forEach((subFile) => {
+                    folderFiles.push(subFile)
+                })
+
+                currentFolder = folderStack.pop()
+            }
+        })
+
+        const deletePaths = Array.from(
+            new Set([...files, ...folderFiles].map((file) => file.path))
+        )
+
+        await Promise.all(deletePaths.map(async (deletePath) => await deleteObject(deletePath)))
+        const updatedItems = await fetchItems()
+        const updatedItemsPaths = updatedItems.map((item) => item.path)
+        setNavigationFolderStack((prev) => {
+            const filteredFolderStack = prev.filter((navigationFolder) => updatedItemsPaths.includes(navigationFolder.path))
+            const updatedNavigationFolderStack = filteredFolderStack
+                .map((navigationFolder) => updatedItems
+                    .find((item) => item.path === navigationFolder.path)
+                )
+                .filter(Boolean)
+
+            return updatedNavigationFolderStack as FileExplorerFolder[]
+        })
+        clearSelectedItems()
+    }, [selectedItems])
+
     return ({
         navigationFolderStack,
         currentFolder,
@@ -204,6 +259,9 @@ export const useFileExplorer = (userId: string) => {
         moveItems,
         renameItem,
         searchQuery,
-        setSearchQuery
+        setSearchQuery,
+        visibleFiles,
+        visibleFolders,
+        deleteItems
     })
 }
