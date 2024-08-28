@@ -163,7 +163,7 @@ export function FileExplorer({ userId }: { userId: string }) {
       {(
         <div className="flex flex-col gap-2 overflow-y-scroll pr-4">
           {!isSelectionDisabled && (!isSelecting ? (
-            <Button className="ml-auto flex gap-2" variant="secondary" onClick={() => {
+            <Button className="ml-auto flex gap-2 hover:bg-background border-2 border-secondary" variant="secondary" onClick={() => {
               setIsSelecting(true)
             }}>
               <small className="text-xs">select items</small>
