@@ -130,7 +130,7 @@ const FileItem = ({ name, type, term = '', selected, onSelect, onRename, onMove,
       onClick={() => {
         showCheckbox && onSelect?.(!selected)
       }}>
-      <div className="rounded-md p-2 bg-primary text-primary-foreground">
+      <div className="rounded-md p-2 text-primary">
         <IconFile />
       </div>
       <div className="flex flex-col flex-1 min-w-0">
@@ -147,8 +147,7 @@ const FileItem = ({ name, type, term = '', selected, onSelect, onRename, onMove,
             />
             <div>.{name.split('.').pop()}</div>
           </div>
-        )}
-        <div className="text-xs text-muted-foreground">{type}</div>
+        )} 
       </div>
       {showCheckbox ? (
         <Checkbox
