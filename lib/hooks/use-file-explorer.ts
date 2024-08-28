@@ -203,7 +203,7 @@ export const useFileExplorer = (userId: string) => {
         })
     }, [selectedItems])
 
-    const deleteItems = useCallback(async (items: FileExplorerItem[]) => {
+    const deleteItems = useCallback(async (items?: FileExplorerItem[]) => {
         const files = (items || selectedItems).filter((item) => item.type === 'file')
         const folders = (items || selectedItems).filter((item) => item.type === 'folder')
         const folderFiles: FileExplorerItem[] = []

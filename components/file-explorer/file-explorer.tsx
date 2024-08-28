@@ -132,7 +132,9 @@ export function FileExplorer({ userId }: { userId: string }) {
       <CreateFolder
         selectedItems={selectedItems}
         currentFolder={currentFolder}
-        moveItems={moveItems}
+        moveItems={(path) => moveItems(path).then(
+          () => {setIsSelecting(false)
+        })}
         clearSelectedItems={clearSelectedItems}
         setDisplayStatus={setDisplayStatus}
       />

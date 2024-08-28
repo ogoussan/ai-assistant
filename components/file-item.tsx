@@ -108,7 +108,6 @@ const FileItem = ({ name, type, term = '', selected, onSelect, onRename, onMove,
         // TODO: Implement open
         break;
       case 'rename':
-        // TODO: Implement move
         setRenameInputValue(name.split('.').slice(0, -1).join('.'))
         setTimeout(() => {
           renameInputRef.current?.focus()
