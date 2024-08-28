@@ -125,7 +125,7 @@ const FileItem = ({ name, type, term = '', selected, onSelect, onRename, onMove,
 
   return (
     <div
-      className="flex items-center rounded-md bg-muted p-1 w-full group cursor-pointer"
+      className="flex items-center rounded-md bg-muted p-1 w-full group hover:opacity-75 cursor-pointer"
       onClick={() => {
         showCheckbox && onSelect?.(!selected)
       }}>
