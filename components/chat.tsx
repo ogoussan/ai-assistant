@@ -10,6 +10,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
 import { useChatMessages } from '@/lib/hooks/use-chat-messages'
+import { useUser } from '@stackframe/stack'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   id: string
@@ -18,6 +19,8 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 }
 
 export function Chat({ id, className, session, missingKeys }: ChatProps) {
+  const user = useUser()
+
   const router = useRouter()
   const path = usePathname()
   const [input, setInput] = useState('')
@@ -33,12 +36,12 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
   const [_, setNewChatId] = useLocalStorage('newChatId', id)
 
   useEffect(() => {
-    if (session?.user) {
+    if (user) {
       if (!path.includes('chat') && messages.length === 1) {
         window.history.replaceState({}, '', `/chat/${id}`)
       }
     }
-  }, [id, path, session?.user, messages])
+  }, [id, path, user, messages])
 
   useEffect(() => {
     const messagesLength = messages?.length

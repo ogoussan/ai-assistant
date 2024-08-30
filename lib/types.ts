@@ -1,5 +1,3 @@
-import { FileExplorer } from "@/components/file-explorer"
-
 export type Message = {
   id: string
   type: 'system' | 'user' | 'assistant' | 'tool'

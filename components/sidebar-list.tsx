@@ -2,6 +2,8 @@ import { clearChats, getChats } from '@/app/actions'
 import { ClearHistory } from '@/components/clear-history'
 import { SidebarItems } from '@/components/sidebar-items'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { stackServerApp } from '@/stack'
+import { useUser } from '@stackframe/stack'
 import { cache } from 'react'
 
 interface SidebarListProps {
@@ -13,8 +15,9 @@ const loadChats = cache(async (userId?: string) => {
   return await getChats(userId)
 })
 
-export async function SidebarList({ userId }: SidebarListProps) {
-  const chats = await loadChats(userId)
+export async function SidebarList() {
+  const user = await stackServerApp.getUser()
+  const chats = await loadChats(user?.id)
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">

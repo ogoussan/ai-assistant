@@ -5,6 +5,7 @@ import { ExclamationTriangleIcon } from '@radix-ui/react-icons'
 import { renderMessage, SpinnerMessage } from './message'
 import { useMemo } from 'react'
 import { nanoid } from 'nanoid'
+import { useUser } from '@stackframe/stack'
 
 export interface ChatList {
   messages: Message[]
@@ -14,12 +15,13 @@ export interface ChatList {
   isLoading?: boolean
 }
 
-export function ChatList({ messages = [], session, isShared, streamedResponse, isLoading }: ChatList) {
+export function ChatList({ messages = [], isShared, streamedResponse, isLoading }: ChatList) {
  const messagesWithStreamedResponse = useMemo(() => (streamedResponse ? [...messages, {id: nanoid(), type: 'assistant', content: streamedResponse}] : messages), [streamedResponse, messages])
+ const user = useUser()
 
   return (
     <div className="relative mx-auto max-w-2xl px-4">
-      {!isShared && !session ? (
+      {!isShared && !user ? (
         <>
           <div className="group relative mb-4 flex items-start md:-ml-12">
             <div className="bg-background flex size-[25px] shrink-0 select-none items-center justify-center rounded-md border shadow-sm">
@@ -28,11 +30,11 @@ export function ChatList({ messages = [], session, isShared, streamedResponse, i
             <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1">
               <p className="text-muted-foreground leading-normal">
                 Please{' '}
-                <Link href="/login" className="underline">
+                <Link href="/handler/signin" className="underline">
                   log in
                 </Link>{' '}
                 or{' '}
-                <Link href="/signup" className="underline">
+                <Link href="/handler/signup" className="underline">
                   sign up
                 </Link>{' '}
                 to save and revisit your chat history!

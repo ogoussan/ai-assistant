@@ -1,4 +1,6 @@
 import { GeistSans } from 'geist/font/sans'
+import { StackProvider, StackTheme } from "@stackframe/stack";
+import { stackServerApp } from "../stack";
 import { GeistMono } from 'geist/font/mono'
 
 import '@/app/globals.css'
@@ -44,21 +46,23 @@ export default function RootLayout({ children }: RootLayoutProps) {
           GeistSans.variable,
           GeistMono.variable
         )}
-      >
-        <Toaster position="top-center" />
-        <Providers
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex flex-col flex-1 bg-muted/50">{children}</main>
-          </div>
-          <TailwindIndicator />
-        </Providers>
-      </body>
+      ><StackProvider app={stackServerApp}>
+        <StackTheme>
+          <Toaster position="top-center" />
+          <Providers
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex flex-col flex-1 bg-muted/50">{children}</main>
+            </div>
+            <TailwindIndicator />
+          </Providers>
+      </StackTheme>
+      </StackProvider></body>
     </html>
   )
 }

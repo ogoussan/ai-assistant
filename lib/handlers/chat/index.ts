@@ -5,14 +5,14 @@ import { nanoid } from "@/lib/utils";
 import { FileData, Message } from "@/lib/types";
 import { Document } from "langchain/document";
 import { uploadFile } from "@/lib/knowledge-base/s3";
-import { auth } from "@/auth";
+import { stackServerApp } from "@/stack";
+
 
 const MAX_FILE_CONTENT_LENGTH = 20_000
 
 export const chatHandler = async (request: Request) => {
 
-    const session = await auth()
-    const userId = session?.user?.id
+    const { id: userId } = await stackServerApp.getUser({or: 'redirect'})
 
     try {
         const contentType = request.headers.get('Content-Type') || '';
