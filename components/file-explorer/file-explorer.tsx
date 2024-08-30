@@ -85,7 +85,7 @@ export function FileExplorer({ userId }: { userId: string }) {
         {selectedItems.length} item(s)
       </div>
     ),
-    icon: () => <ImportIcon className="mr-2" />,
+    icon: () => <ImportIcon />,
     label: 'Move here',
     ...getButtonAnimationProps(selectedItems.length > 0 && displayStatus === 'move')
   }), [currentFolder, selectedItems, displayStatus])
@@ -103,9 +103,9 @@ export function FileExplorer({ userId }: { userId: string }) {
     onClick: () => {
       setDisplayStatus('create-folder')
     },
-    icon: () => <FolderPlusIcon className="mr-2" />,
-    label: 'Add to new folder',
-    ...getButtonAnimationProps(!!selectedItems.length && displayStatus === 'standard')
+    icon: () => <FolderPlusIcon />,
+    label: 'Create a new folder',
+    ...getButtonAnimationProps(displayStatus !== 'create-folder')
   }), [currentFolder, selectedItems, displayStatus])
 
   const moveSelectedItemProps: FileExplorerButtonProps = useMemo(() => ({
@@ -113,7 +113,7 @@ export function FileExplorer({ userId }: { userId: string }) {
       setDisplayStatus('move')
       setIsSelecting(false)
     },
-    icon: () => <FolderInputIcon className="mr-2" />,
+    icon: () => <FolderInputIcon />,
     label: 'Move to a folder',
     ...getButtonAnimationProps(!!selectedItems.length && displayStatus !== 'move')
   }), [currentFolder, selectedItems, displayStatus])
@@ -122,7 +122,7 @@ export function FileExplorer({ userId }: { userId: string }) {
     onClick: () => {
       deleteItems()
     },
-    icon: () => <Trash2Icon className="mr-2" />,
+    icon: () => <Trash2Icon />,
     label: 'Delete',
     ...getButtonAnimationProps(!!selectedItems.length && displayStatus !== 'move')
   }), [currentFolder, selectedItems, displayStatus])

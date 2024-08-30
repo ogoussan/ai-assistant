@@ -3,7 +3,7 @@ import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { motion } from "framer-motion"
 import { ChevronLeftIcon, FolderIcon } from "lucide-react"
-import { NEW_FOLDER_NAME } from "@/constants/file-constants"
+import { NEW_FOLDER_DEFAULT_NAME } from "@/constants/file-constants"
 import FileItem from "../file-item"
 import FolderItem from "../folder-item"
 
@@ -16,11 +16,11 @@ type CreateFolderProps = {
 }
 
 export function CreateFolder({ selectedItems, currentFolder, moveItems, clearSelectedItems, setDisplayStatus }: CreateFolderProps) {
-  const [newFolderName, setNewFolderName] = useState(NEW_FOLDER_NAME)
+  const [newFolderName, setNewFolderName] = useState(NEW_FOLDER_DEFAULT_NAME)
   const inputElement = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    setNewFolderName(NEW_FOLDER_NAME)
+    setNewFolderName(NEW_FOLDER_DEFAULT_NAME)
     inputElement.current?.focus()
     inputElement.current?.select()
   }, [])

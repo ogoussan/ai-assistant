@@ -125,11 +125,11 @@ const FileItem = ({ name, type, term = '', selected, onSelect, onRename, onMove,
 
   return (
     <div
-      className="flex items-center rounded-md bg-muted p-1 w-full group hover:opacity-75 cursor-pointer"
+      className="flex gap-2 items-center rounded-md bg-muted px-4 py-2 w-full group hover:opacity-75 cursor-pointer"
       onClick={() => {
         showCheckbox && onSelect?.(!selected)
       }}>
-      <div className="rounded-md p-2 text-primary">
+      <div className="rounded-md text-primary p-2">
         <IconFile />
       </div>
       <div className="flex flex-col flex-1 min-w-0">

@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { FileExplorerFolder, FileExplorerItem } from "../types"
 import { aggregateFileExplorerItems } from "../file-explorer"
 import Fuse from "fuse.js"
-import { deleteObject, moveObject } from "../knowledge-base/s3"
+import { createEmptyFolder, deleteObject, moveObject } from "../knowledge-base/s3"
 import { slicePath, splitFileName } from "../path.helper"
+import { PLACEHOLDER_FILE_NAME } from "@/constants/file-constants"
 
 export const useFileExplorer = (userId: string) => {
     // NAVIGATION STATE
@@ -161,40 +162,44 @@ export const useFileExplorer = (userId: string) => {
         let sourcePaths: string[] = []
         let destinationPaths: string[] = []
 
-        selectedItems.forEach((item) => {
-            if (item.type === 'folder') {
-                const folderStack: FileExplorerFolder[] = [item]
-                const folderPathOffset = item.path.split('/')
-                    .filter(Boolean).length
-
-                while (folderStack.length) {
-                    const currentFolder = folderStack.pop()!
-                    const currentFolderSourcePaths = currentFolder.files
-                        .map((file) => file.path)
-                    const currentFolderDestinationPaths = currentFolder.files
-                        .map((file) => {
-                        const pathSuffix = file.path
-                            .split('/')
-                            .slice(folderPathOffset - 1, -1)
-                            .join('/')
-
-                        return path + '/' + pathSuffix
-                    })
-                    sourcePaths = [...sourcePaths, ...currentFolderSourcePaths]
-                    destinationPaths = [
-                        ...destinationPaths,
-                        ...currentFolderDestinationPaths
-                    ]
-                    currentFolder.folders.forEach((folder) => folderStack.push(folder))
+        if (selectedItems.length) {
+            selectedItems.forEach((item) => {
+                if (item.type === 'folder') {
+                    const folderStack: FileExplorerFolder[] = [item]
+                    const folderPathOffset = item.path.split('/')
+                        .filter(Boolean).length
+    
+                    while (folderStack.length) {
+                        const currentFolder = folderStack.pop()!
+                        const currentFolderSourcePaths = currentFolder.files
+                            .map((file) => file.path)
+                        const currentFolderDestinationPaths = currentFolder.files
+                            .map((file) => {
+                            const pathSuffix = file.path
+                                .split('/')
+                                .slice(folderPathOffset - 1, -1)
+                                .join('/')
+    
+                            return path + '/' + pathSuffix
+                        })
+                        sourcePaths = [...sourcePaths, ...currentFolderSourcePaths]
+                        destinationPaths = [
+                            ...destinationPaths,
+                            ...currentFolderDestinationPaths
+                        ]
+                        currentFolder.folders.forEach((folder) => folderStack.push(folder))
+                    }
+                } else {
+                    sourcePaths.push(item.path)
                 }
-            } else {
-                sourcePaths.push(item.path)
-            }
-        })
-
-        await Promise.all(sourcePaths.map((sourcePath, i) => {
-            return moveObject(sourcePath, destinationPaths[i] || path)
-        }))
+            })
+    
+            await Promise.all(sourcePaths.map((sourcePath, i) => {
+                return moveObject(sourcePath, destinationPaths[i] || path)
+            }))
+        } else {
+            createEmptyFolder(path)
+        }
 
         fetchItems().then((_items) => {
             const newFolder = _items
@@ -228,6 +233,14 @@ export const useFileExplorer = (userId: string) => {
         const deletePaths = Array.from(
             new Set([...files, ...folderFiles].map((file) => file.path))
         )
+
+        if (deletePaths.length === 0) {
+            console.log('Deleting empty folder...')
+
+            deletePaths.push(`${currentFolder.path}/${PLACEHOLDER_FILE_NAME}`)
+        }
+
+        console.log('delete paths: ', deletePaths)
 
         await Promise.all(deletePaths.map(async (deletePath) => await deleteObject(deletePath)))
         const updatedItems = await fetchItems()

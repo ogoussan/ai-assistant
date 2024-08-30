@@ -1,7 +1,8 @@
 'use server'
-import { S3Client, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, CopyObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, CopyObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { Progress, Upload } from '@aws-sdk/lib-storage'
 import { FileData } from '../types'
+import { PLACEHOLDER_FILE_NAME } from '@/constants/file-constants'
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION,
@@ -58,12 +59,13 @@ export const downloadObject = async (path: string) => {
   ).Body
 };
 
-export const deleteObject = async (key: string) => {
+export const deleteObject = async (path: string) => {
   const deleteParams = {
     Bucket,
-    Key: key,
+    Key: path,
   };
 
+  console.log(`[S3 Operation]: Deleting object with path: ${path}`)
   return s3Client.send(new DeleteObjectCommand(deleteParams));
 };
 
@@ -108,6 +110,27 @@ export const moveObject = async (sourcePath: string, destinationPath: string, ne
 
   return { sourceKey: sourcePath, destinationKey: destinationPath };
 }
+
+export const createEmptyFolder = async (path: string) => {
+  const key = `${path}/${PLACEHOLDER_FILE_NAME}`;
+
+  console.log(`[S3 Operation]: Creating empty folder at ${key}`);
+
+  try {
+    const command = new PutObjectCommand({
+      Bucket,
+      Key: key,
+      Body: '', // Empty body to simulate an empty file
+    });
+
+    const result = await s3Client.send(command);
+    console.log(`[S3 Operation]: Empty folder created at ${key}`);
+    return result;
+  } catch (error) {
+    console.error(`[S3 Operation]: Error creating empty folder: ${error}`);
+    throw error;
+  }
+};
 
 const _s3SanitizeFileName = (fileName: string) => {
   const umlautsMap = {

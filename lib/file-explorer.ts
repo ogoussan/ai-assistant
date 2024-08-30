@@ -1,16 +1,17 @@
-import { HOME_DIRECTORY_NAME } from "@/constants/file-constants"
+import { HOME_DIRECTORY_NAME, PLACEHOLDER_FILE_NAME } from "@/constants/file-constants"
 import { fetchObjectPaths } from "./knowledge-base/s3"
 import { FileExplorerFile, FileExplorerFolder, FileExplorerItem } from "./types"
 import { formatPath, getNameFromPath, slicePath } from "./path.helper"
 
 export const aggregateFileExplorerItems = async (userId: string): Promise<FileExplorerItem[]> => {
     const objectPaths = await fetchObjectPaths(userId)
-    const files: FileExplorerFile[] = objectPaths.map((objectPath) => {
-        return ({
-            type: 'file',
-            path: objectPath,
-            name: getNameFromPath(objectPath)
-        })
+    const files: FileExplorerFile[] = objectPaths
+        .map((objectPath) => {
+            return ({
+                type: 'file',
+                path: objectPath,
+                name: getNameFromPath(objectPath)
+            })
     })
 
     let folders: FileExplorerFolder[] = []
@@ -23,7 +24,8 @@ export const aggregateFileExplorerItems = async (userId: string): Promise<FileEx
             )
 
             const path = slicePath(file.path, 0, directoryIndex)
-            const isFileOfCurrentDirectory = formatPath(file.path).split('/').length === directoryIndex + 2
+            const isFileOfCurrentDirectory = formatPath(file.path).split('/').length === directoryIndex + 2 
+                && getNameFromPath(file.path) !== PLACEHOLDER_FILE_NAME
 
             if (!containsDirectoryNameInFolders) {
                 const newFolder: FileExplorerItem = { 
@@ -57,5 +59,9 @@ export const aggregateFileExplorerItems = async (userId: string): Promise<FileEx
         })
     });
 
-    return [...folders, ...files]
+
+    return [
+        ...folders,
+        ...files
+    ]
 }

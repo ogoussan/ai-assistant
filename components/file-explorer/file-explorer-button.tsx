@@ -34,7 +34,7 @@ export function FileExplorerButton({
         >
             {LeftContent && <LeftContent />}
             <Button
-                className="w-full flex"
+                className="w-full flex gap-2"
                 variant="outline"
                 onClick={onClick}
             >
