@@ -214,19 +214,19 @@ export const useFileExplorer = (userId: string) => {
         const folderFiles: FileExplorerItem[] = []
 
         folders.forEach((folder) => {
-            let currentFolder: FileExplorerFolder | undefined = folder
+            let _currentFolder: FileExplorerFolder | undefined = folder
             const folderStack: FileExplorerFolder[] = []
 
-            while(currentFolder) {
-                currentFolder!.folders.forEach((subFolder) => {
+            while(_currentFolder) {
+                _currentFolder!.folders.forEach((subFolder) => {
                     folderStack.push(subFolder)
                 })
 
-                currentFolder!.files.forEach((subFile) => {
+                _currentFolder!.files.forEach((subFile) => {
                     folderFiles.push(subFile)
                 })
 
-                currentFolder = folderStack.pop()
+                _currentFolder = folderStack.pop()
             }
         })
 
@@ -234,13 +234,9 @@ export const useFileExplorer = (userId: string) => {
             new Set([...files, ...folderFiles].map((file) => file.path))
         )
 
-        if (deletePaths.length === 0) {
-            console.log('Deleting empty folder...')
-
-            deletePaths.push(`${currentFolder.path}/${PLACEHOLDER_FILE_NAME}`)
+        if (deletePaths.length === 0 && selectedItems?.length === 1 && selectedItems[0].type === 'folder') {
+            deletePaths.push(`${currentFolder.path}/${selectedItems[0].name}/${PLACEHOLDER_FILE_NAME}`)
         }
-
-        console.log('delete paths: ', deletePaths)
 
         await Promise.all(deletePaths.map(async (deletePath) => await deleteObject(deletePath)))
         const updatedItems = await fetchItems()
@@ -256,7 +252,7 @@ export const useFileExplorer = (userId: string) => {
             return updatedNavigationFolderStack as FileExplorerFolder[]
         })
         clearSelectedItems()
-    }, [selectedItems])
+    }, [selectedItems, currentFolder])
 
     return ({
         navigationFolderStack,
