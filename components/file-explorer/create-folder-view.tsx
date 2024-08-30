@@ -60,6 +60,9 @@ export function CreateFolder({ selectedItems, currentFolder, moveItems, clearSel
           />
           <FolderIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
+        {!!selectedItems.length && (
+          <div className="text-m">Will be moving {selectedItems.length} item(s) to this folder</div>
+        )}
         {selectedItems.map(({ name, path, type }) => (
           <div className="opacity-60" key={path}>
             {type === 'file' ? (

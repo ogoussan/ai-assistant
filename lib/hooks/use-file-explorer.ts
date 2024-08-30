@@ -7,6 +7,9 @@ import { slicePath, splitFileName } from "../path.helper"
 import { PLACEHOLDER_FILE_NAME } from "@/constants/file-constants"
 
 export const useFileExplorer = (userId: string) => {
+    const [isLoading, setIsLoading] = useState(false)
+    const  [isInitialized, setIsInitialized] = useState(false)
+
     // NAVIGATION STATE
     const [navigationFolderStack, setNavigationFolderStack] =
         useState<FileExplorerFolder[]>([])
@@ -66,8 +69,14 @@ export const useFileExplorer = (userId: string) => {
 
 
     useEffect(() => {
-        fetchItems()
-    }, [])
+        if (!isInitialized) {
+            setIsLoading(true)
+            fetchItems().then(() => {
+                setIsLoading(false)
+                setIsInitialized(true)
+            }) 
+        } 
+    }, [isInitialized])
 
     useEffect(() => {
         if (totalItems.length && !navigationFolderStack.length) {
@@ -271,6 +280,7 @@ export const useFileExplorer = (userId: string) => {
         setSearchQuery,
         visibleFiles,
         visibleFolders,
-        deleteItems
+        deleteItems,
+        isLoading
     })
 }

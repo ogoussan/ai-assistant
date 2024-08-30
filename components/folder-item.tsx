@@ -23,7 +23,7 @@ const FolderItem = ({ name, term = '', selected, onSelect, onClick, showCheckbox
     }, [term]);
 
     return (
-        <div className="flex gap-2 items-center rounded-md bg-muted px-4 py-2 w-full group hover:opacity-75 cursor-pointer" onClick={() => {
+        <div className="flex gap-2 items-center rounded-md bg-muted p-2 w-full group hover:opacity-75 cursor-pointer" onClick={() => {
             showCheckbox ? onSelect?.(!selected) : onClick?.()
         }}>
             <div className="rounded-md p-2 bg-gray-400 text-primary-foreground">

@@ -19,11 +19,13 @@ import { Checkbox } from "../ui/checkbox"
 import { CreateFolder } from "./create-folder-view"
 import BreadcrumbNavigation from "./breadcrumb-navigation"
 import { FileExplorerButton, FileExplorerButtonProps } from "./file-explorer-button"
+import { Skeleton } from "../ui/skeleton"
 
 type DisplayStatus = 'standard' | 'create-folder' | 'move'
 
 export function FileExplorer({ userId }: { userId: string }) {
   const {
+    isLoading,
     navigationFolderStack,
     currentFolder,
     selectedItems,
@@ -44,7 +46,7 @@ export function FileExplorer({ userId }: { userId: string }) {
   } = useFileExplorer(userId)
   const [displayStatus, setDisplayStatus] = useState<DisplayStatus>('standard')
   const [isSelecting, setIsSelecting] = useState(false)
-  const [isSelectionDisabled, setIsSelectionDisabled] = useState()
+  const [isSelectionDisabled, setIsSelectionDisabled] = useState(false)
 
   const getButtonAnimationProps = (isVisible: boolean) => ({
     initial: {
@@ -94,6 +96,7 @@ export function FileExplorer({ userId }: { userId: string }) {
     onClick: () => {
       clearSelectedItems()
       setDisplayStatus('standard')
+      setIsSelectionDisabled(true)
     },
     label: 'Cancel',
     ...getButtonAnimationProps(selectedItems.length > 0 && displayStatus === 'move')
@@ -194,6 +197,7 @@ export function FileExplorer({ userId }: { userId: string }) {
               </div>
             </motion.div>
           ))}
+          {isLoading && <Skeleton className="w-full h-[56px] rouded-md" />} 
           {visibleFolders.map((item) => (
               <motion.div
                 key={item.path}
