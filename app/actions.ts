@@ -12,7 +12,7 @@ export async function getChats(userId?: string | null) {
     return []
   }
 
-  console.log(`[actions]: Fetching chats of user with id: ${userId}`)
+  console.log(`[app/actions]: Fetching chats of user with id: ${userId}`)
   try {
     const pipeline = kv.pipeline()
     const chats: string[] = await kv.zrange(`user:chat:${userId}`, 0, -1, {
@@ -24,7 +24,7 @@ export async function getChats(userId?: string | null) {
     }
 
     const results = await pipeline.exec()
-    console.log(`[actions]: Chat fetch result: ...`) 
+    console.log(`[app/actions]: Chat fetch result: ...`) 
 
     return results as Chat[]
   } catch (error) {
@@ -33,9 +33,12 @@ export async function getChats(userId?: string | null) {
 }
 
 export async function getChat(id: string, userId: string) {
+  console.log(`[app/actions - getChat]: Fetching chat with id: ${id}`)
   const chat = await kv.hgetall<Chat>(`chat:${id}`)
 
   if (!chat || (userId && chat.userId !== userId)) {
+    console.log(`[app/actions - getChat]: No chat with id ${id} found for current user`)
+
     return null
   }
 
@@ -43,6 +46,8 @@ export async function getChat(id: string, userId: string) {
 }
 
 export async function removeChat({ id, path }: { id: string; path: string }) {
+  console.log(`[app/actions removeChat]: Removing chat with id ${id} `)
+
   const user = await stackServerApp.getUser()
 
   if (!user) {
@@ -68,6 +73,7 @@ export async function removeChat({ id, path }: { id: string; path: string }) {
 }
 
 export async function clearChats() {
+  console.log('[app/actions - clearChat]: Clearing chat')
   const user = await stackServerApp.getUser({or: 'redirect'})
 
   if (user.id) {
@@ -94,6 +100,7 @@ export async function clearChats() {
 }
 
 export async function getSharedChat(id: string) {
+  console.log(`[app/actions - getSharedChat]: Fetching shared chat for id ${id}`)
   const chat = await kv.hgetall<Chat>(`chat:${id}`)
 
   if (!chat || !chat.sharePath) {
@@ -104,6 +111,7 @@ export async function getSharedChat(id: string) {
 }
 
 export async function shareChat(id: string) {
+  console.log(`[app/actions - shareChat]: Sharing chat with id ${id}`)
   const user = await stackServerApp.getUser()
 
   if (!user?.id) {
@@ -132,7 +140,7 @@ export async function shareChat(id: string) {
 
 export async function saveChat(chat: Chat) {
   const user = await stackServerApp.getUser()
-  console.log(`[action]: Saving chat with id: ${chat.id}`)
+  console.log(`[app/actions - saveChat]: Saving chat ${chat}`)
 
   if (user) {
     const pipeline = kv.pipeline()
@@ -148,6 +156,7 @@ export async function saveChat(chat: Chat) {
 }
 
 export async function refreshHistory(path: string) {
+  console.log('[app/actions] Refreshing history')
   redirect(path)
 }
 

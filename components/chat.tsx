@@ -5,7 +5,7 @@ import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import { useEffect, useState } from 'react'
-import { FileData, Session } from '@/lib/types'
+import { FileData } from '@/lib/types'
 import { usePathname, useRouter } from 'next/navigation'
 import { useScrollAnchor } from '@/lib/hooks/use-scroll-anchor'
 import { toast } from 'sonner'
@@ -14,17 +14,17 @@ import { useUser } from '@stackframe/stack'
 
 export interface ChatProps extends React.ComponentProps<'div'> {
   id: string
-  session?: Session
+  userId?: string
   missingKeys: string[]
 }
 
-export function Chat({ id, className, session, missingKeys }: ChatProps) {
+export function Chat({ id, className, userId, missingKeys }: ChatProps) {
   const user = useUser()
 
   const router = useRouter()
   const path = usePathname()
   const [input, setInput] = useState('')
-  const { messages, sendMessage, streamedResponse } = useChatMessages(id, session?.user.id)
+  const { messages, sendMessage, streamedResponse, isPending } = useChatMessages(id, userId)
   const [isRespondLoading, setIsRespondLoading] = useState(false)
 
   const _sendMessage = async (content: string, files?: FileData[]) => {
@@ -38,6 +38,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
   useEffect(() => {
     if (user) {
       if (!path.includes('chat') && messages.length === 1) {
+        console.log(`[Chat] Navigate to new chat with id ${id}`)
         window.history.replaceState({}, '', `/chat/${id}`)
       }
     }
@@ -45,14 +46,14 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
 
   useEffect(() => {
     const messagesLength = messages?.length
-    if (messagesLength === 2) {
+    if (messagesLength === 2 && !isPending) {
       router.refresh()
     }
-  }, [messages, router])
+  }, [messages, router, isPending])
 
   useEffect(() => {
     setNewChatId(id)
-  })
+  }, [id])
 
   useEffect(() => {
     missingKeys.map(key => {
@@ -71,7 +72,7 @@ export function Chat({ id, className, session, missingKeys }: ChatProps) {
         className={cn('pb-[200px] pt-4 md:pt-10', className)}
         ref={messagesRef}
       >
-        <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} session={session} isLoading={isRespondLoading} />
+        <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} isLoading={isRespondLoading} />
         <div className="w-full h-px" ref={visibilityRef} />
       </div>
       <ChatPanel

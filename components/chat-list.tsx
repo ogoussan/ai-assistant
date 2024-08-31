@@ -1,5 +1,5 @@
 import { Separator } from '@/components/ui/separator'
-import { Message, Session } from '@/lib/types'
+import { Message } from '@/lib/types'
 import Link from 'next/link'
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons'
 import { renderMessage, SpinnerMessage } from './message'
@@ -10,7 +10,6 @@ import { useUser } from '@stackframe/stack'
 export interface ChatList {
   messages: Message[]
   streamedResponse?: string
-  session?: Session
   isShared: boolean
   isLoading?: boolean
 }

@@ -3,7 +3,6 @@ import { notFound, redirect } from 'next/navigation'
 
 import { getChat, getMissingKeys } from '@/app/actions'
 import { Chat } from '@/components/chat'
-import { Session } from '@/lib/types'
 import { stackServerApp } from '@/stack'
 
 export interface ChatPageProps {
@@ -49,6 +48,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
   return (
     <Chat
       id={chat?.id}
+      userId={userId}
       missingKeys={missingKeys}
     />
   )

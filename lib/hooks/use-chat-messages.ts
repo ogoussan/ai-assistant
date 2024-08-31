@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 export function useChatMessages(chatId: string,  userId?: string) {
     const [messages, setMessages] = useState<Message[]>([])
     const [streamedResponse, setStreamedResponse] = useState<string | undefined>('')
+    const [isPending, setIsPending] = useState(false)
 
     useEffect(() => {
         (async () => {
@@ -22,8 +23,10 @@ export function useChatMessages(chatId: string,  userId?: string) {
     useEffect(() => {
         (async () => {
             if (!messages.length || !userId) {
+                setIsPending(false) 
                 return
             }
+            console.log('[UseChatMessages] - Saving changes made to chat')
             
             const createdAt = new Date()
             const path = `/chat/${chatId}`
@@ -46,13 +49,17 @@ export function useChatMessages(chatId: string,  userId?: string) {
                 path
             }
             
-            saveChat(chat);
+            await saveChat(chat)
+            setIsPending(false)
         })()
     }, [messages])
 
     async function sendMessage(content: string, files: FileData[] = []) {
+        const id = nanoid()
+        console.log(`[UseChatMessage] Sending message with id ${id}`)
+
         const userMessage: Message = {
-            id: nanoid(),
+            id,
             type: 'user',
             content,
         };
@@ -90,14 +97,16 @@ export function useChatMessages(chatId: string,  userId?: string) {
             });
     
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Network response was not ok')
             }
     
-            const reader = response.body?.getReader();
-            const decoder = new TextDecoder('utf-8');
+            const reader = response.body?.getReader()
+            const decoder = new TextDecoder('utf-8')
     
-            let done = false;
-            let fullText = '';
+            let done = false
+            let fullText = ''
+
+            setIsPending(true)
     
             while (!done) {
                 const { value, done: streamDone } = await reader!.read();
@@ -106,7 +115,8 @@ export function useChatMessages(chatId: string,  userId?: string) {
                 setStreamedResponse((prev) => prev + chunk);
                 fullText += chunk;
             }
-    
+
+            console.log('[UseChatMessages] Stream of response assistant message completed')
             setMessages((previousMessages) => [
                 ...previousMessages,
                 {
@@ -122,5 +132,5 @@ export function useChatMessages(chatId: string,  userId?: string) {
         }
     }
 
-    return { messages, sendMessage, streamedResponse }
+    return { messages, sendMessage, streamedResponse, isPending }
 }

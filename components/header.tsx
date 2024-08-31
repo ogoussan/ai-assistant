@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/icons'
 import { SidebarMobile } from './sidebar-mobile'
 import { ChatHistory } from './chat-history'
-import { Session } from '@/lib/types'
 import { FolderIcon } from "lucide-react";
 import { FileExplorer } from "./file-explorer/file-explorer";
 import { UserButton, useStackApp, useUser } from '@stackframe/stack'
