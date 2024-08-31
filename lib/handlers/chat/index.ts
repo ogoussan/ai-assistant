@@ -37,6 +37,7 @@ export const chatHandler = async (request: Request) => {
 
                 if (pdfFile) {
                     const arrayBuffer = await pdfFile.arrayBuffer()
+                    console.log('arrayBuffer', arrayBuffer)
                     const loader = new WebPDFLoader(new Blob([arrayBuffer], { type: 'application/pdf' }))
                     documents = await loader.load()
 
