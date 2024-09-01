@@ -6,58 +6,51 @@ import { FileData, Message } from "@/lib/types";
 import { Document } from "langchain/document";
 import { uploadFile } from "@/lib/knowledge-base/s3";
 import { stackServerApp } from "@/stack";
+import { loadFile } from "@/lib/loaders";
 
 
 const MAX_FILE_CONTENT_LENGTH = 20_000
 
 export const chatHandler = async (request: Request) => {
 
-    const { id: userId } = await stackServerApp.getUser({or: 'redirect'})
+    const { id: userId } = await stackServerApp.getUser({ or: 'redirect' })
 
     try {
         const contentType = request.headers.get('Content-Type') || '';
         if (contentType.includes('multipart/form-data')) {
             const formData = await request.formData();
-            
+
             const previousMessages = JSON.parse(formData.get('previousMessages') as string) as Message[]
             const chatId = formData.get('chatId') as string
             const files = formData.getAll('files') as Blob[]
 
-            let documents: Document[] = [];
+            let documentsCollection: Document[][] = []
 
-            if (files.length > 0) {
-                const pdfFile = files.find(file => file.type === 'application/pdf');
-                const fileName = (pdfFile as any).name;
+            await Promise.all(files.map(async (blobFile) => {
                 const file: FileData = {
                     key: userId || '',
-                    arrayBuffer: await pdfFile!.arrayBuffer(),
-                    name: fileName,
-                    type: 'pdf',
+                    arrayBuffer: await blobFile!.arrayBuffer(),
+                    name: (blobFile as any).name,
+                    type: blobFile.type,
                 }
 
-                if (pdfFile) {
-                    const arrayBuffer = await pdfFile.arrayBuffer()
-                    console.log('arrayBuffer', arrayBuffer)
-                    const loader = new WebPDFLoader(new Blob([arrayBuffer], { type: 'application/pdf' }))
-                    documents = await loader.load()
+                const arrayBuffer = await blobFile.arrayBuffer()
+                const documents = await loadFile(blobFile)
+                documentsCollection.push(documents)
 
-                    if (userId) {
-                        const result = await uploadFile(file, userId)
-                        console.log('File uploaded successfully:', result)
-                    }
-                } else {
-                    return NextResponse.json(
-                        { message: 'Invalid file type. Please upload a PDF.' },
-                        { status: 400 }
-                    )
+                if (userId) {
+                    const result = await uploadFile(file, userId)
+                    console.log('File uploaded successfully:', result)
                 }
-            }
+            }))
 
-            const fullText = (documents.map(({pageContent}) => pageContent) as string[]).join()
+            const flattenedDocumentCollection = documentsCollection.flat()
+
+            const fullText = (flattenedDocumentCollection.map(({ pageContent }) => pageContent) as string[]).join()
             const message: Message = {
                 id: nanoid(),
                 type: 'user',
-                content: `${formData.get('message') as string} ${files.length && documents[0]?.pageContent
+                content: `${formData.get('message') as string} ${files.length && flattenedDocumentCollection[0]?.pageContent
                     ? 'use this file content as context: ' + fullText.substring(0, MAX_FILE_CONTENT_LENGTH)
                     : ''
                 }`,

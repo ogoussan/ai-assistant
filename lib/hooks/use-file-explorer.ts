@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { FileExplorerFolder, FileExplorerItem } from "../types"
-import { aggregateFileExplorerItems } from "../file-explorer"
+import { aggregateFileExplorerItems, previewPDF } from "../file-explorer"
 import Fuse from "fuse.js"
 import { createEmptyFolder, deleteObject, moveObject } from "../knowledge-base/s3"
-import { slicePath, splitFileName } from "../path.helper"
+import { getPathFileExtension, slicePath, splitFileName } from "../path.helper"
 import { PLACEHOLDER_FILE_NAME } from "@/constants/file-constants"
 
 export const useFileExplorer = (userId: string) => {
     const [isLoading, setIsLoading] = useState(false)
-    const  [isInitialized, setIsInitialized] = useState(false)
+    const [isInitialized, setIsInitialized] = useState(false)
 
     // NAVIGATION STATE
     const [navigationFolderStack, setNavigationFolderStack] =
@@ -44,17 +44,17 @@ export const useFileExplorer = (userId: string) => {
     const visibleItems = useMemo(() => searchQuery.trim()
         ? searchResultItems
         : folderItems,
-    [searchQuery, searchResultItems, folderItems])
+        [searchQuery, searchResultItems, folderItems])
 
-    const visibleFiles = useMemo(() => searchQuery.length 
-        ? searchResultFiles 
-        : currentFolder?.files || [], 
-    [searchQuery, searchResultFolders, currentFolder])
+    const visibleFiles = useMemo(() => searchQuery.length
+        ? searchResultFiles
+        : currentFolder?.files || [],
+        [searchQuery, searchResultFolders, currentFolder])
 
-    const visibleFolders = useMemo(() => searchQuery.length 
-        ? searchResultFolders 
+    const visibleFolders = useMemo(() => searchQuery.length
+        ? searchResultFolders
         : currentFolder?.folders || [],
-    [searchQuery, searchResultFolders, currentFolder])
+        [searchQuery, searchResultFolders, currentFolder])
 
     // SELECTION STATE
     const [selectedItems, setSelectedItems] = useState<FileExplorerItem[]>([])
@@ -74,13 +74,13 @@ export const useFileExplorer = (userId: string) => {
             fetchItems().then(() => {
                 setIsLoading(false)
                 setIsInitialized(true)
-            }) 
-        } 
+            })
+        }
     }, [isInitialized])
 
     useEffect(() => {
         if (totalItems.length && !navigationFolderStack.length) {
-            const rootFolder = 
+            const rootFolder =
                 totalItems.find((_item) => _item.path === userId) as FileExplorerFolder
 
             if (rootFolder) {
@@ -108,11 +108,11 @@ export const useFileExplorer = (userId: string) => {
         setNavigationFolderStack(
             folder.path.split('/').filter(Boolean).map((_, i) => {
                 const path = slicePath(folder.path, 0, i + 1)
-                
+
                 return (newItems ? newItems : totalItems)
                     .find((_folder) => _folder.path === path)
             }).sort((a, b) => a!.path.split('/')
-            .length - b!.path.split('/').length) as FileExplorerFolder[]
+                .length - b!.path.split('/').length) as FileExplorerFolder[]
         )
     }
 
@@ -124,14 +124,15 @@ export const useFileExplorer = (userId: string) => {
         setSelectedItems((prev) => {
             const isPathIncluded = prev
                 .map((_item) => _item.path).includes(item.path);
-                    return isPathIncluded  
-                        ? prev.filter((_item) => _item.path !== item.path) 
-                        : [...prev, item]
-        }   
-    )}
+            return isPathIncluded
+                ? prev.filter((_item) => _item.path !== item.path)
+                : [...prev, item]
+        }
+        )
+    }
 
     const isItemSelected = useCallback((itemPath: string) => selectedItems
-        .some((selectedItem) => selectedItem.path === itemPath), 
+        .some((selectedItem) => selectedItem.path === itemPath),
         [selectedItems]
     )
 
@@ -144,6 +145,16 @@ export const useFileExplorer = (userId: string) => {
     const clearSelectedItems = useCallback(() => {
         setSelectedItems([])
     }, [])
+
+    const openFile = async (path: string) => {
+        const response = await fetch(`/api/file?path=${encodeURIComponent(path)}`)
+        const blob = await response.blob()
+        console.log('Blob', blob)
+        const url = URL.createObjectURL(blob)
+        window.open(url, '_blank')
+
+        Promise.resolve()
+    }
 
     const renameItem = useCallback(async (item: FileExplorerItem, name: string) => {
         const [nameWithoutExtension, extension] = splitFileName(item.name)
@@ -177,20 +188,20 @@ export const useFileExplorer = (userId: string) => {
                     const folderStack: FileExplorerFolder[] = [item]
                     const folderPathOffset = item.path.split('/')
                         .filter(Boolean).length
-    
+
                     while (folderStack.length) {
                         const currentFolder = folderStack.pop()!
                         const currentFolderSourcePaths = currentFolder.files
                             .map((file) => file.path)
                         const currentFolderDestinationPaths = currentFolder.files
                             .map((file) => {
-                            const pathSuffix = file.path
-                                .split('/')
-                                .slice(folderPathOffset - 1, -1)
-                                .join('/')
-    
-                            return path + '/' + pathSuffix
-                        })
+                                const pathSuffix = file.path
+                                    .split('/')
+                                    .slice(folderPathOffset - 1, -1)
+                                    .join('/')
+
+                                return path + '/' + pathSuffix
+                            })
                         sourcePaths = [...sourcePaths, ...currentFolderSourcePaths]
                         destinationPaths = [
                             ...destinationPaths,
@@ -202,7 +213,7 @@ export const useFileExplorer = (userId: string) => {
                     sourcePaths.push(item.path)
                 }
             })
-    
+
             await Promise.all(sourcePaths.map((sourcePath, i) => {
                 return moveObject(sourcePath, destinationPaths[i] || path)
             }))
@@ -212,7 +223,7 @@ export const useFileExplorer = (userId: string) => {
 
         fetchItems().then((_items) => {
             const newFolder = _items
-            .find((item) => item.path === path) as FileExplorerFolder
+                .find((item) => item.path === path) as FileExplorerFolder
             navigateToFolder(newFolder, _items)
         })
     }, [selectedItems])
@@ -226,7 +237,7 @@ export const useFileExplorer = (userId: string) => {
             let _currentFolder: FileExplorerFolder | undefined = folder
             const folderStack: FileExplorerFolder[] = []
 
-            while(_currentFolder) {
+            while (_currentFolder) {
                 _currentFolder!.folders.forEach((subFolder) => {
                     folderStack.push(subFolder)
                 })
@@ -274,6 +285,7 @@ export const useFileExplorer = (userId: string) => {
         clearSelectedItems,
         navigateToFolder,
         navigateToFolderAtIndex,
+        openFile,
         moveItems,
         renameItem,
         searchQuery,

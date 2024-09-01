@@ -48,15 +48,26 @@ export const uploadFile = async (
   return data
 };
 
+const _streamToBlob = async (stream) => {
+  const chunks: Uint8Array[] = []
+
+  for await (const chunk of stream) {
+      chunks.push(chunk);
+  }
+  return new Blob(chunks, { type: 'application/pdf' });
+};
+
 export const downloadObject = async (path: string) => {
-  return (
-    await s3Client.send(
-      new GetObjectCommand({
-        Bucket,
-        Key: path,
-      })
-    )
-  ).Body
+  const result = await s3Client.send(new GetObjectCommand(
+    {
+      Bucket,
+      Key: path,
+    })
+  )
+
+  console.log('Result body: ', result.Body)
+
+  return await _streamToBlob(result.Body)
 };
 
 export const deleteObject = async (path: string) => {

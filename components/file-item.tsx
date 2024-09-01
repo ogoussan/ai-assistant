@@ -7,11 +7,11 @@ import { Input } from "./ui/input";
 
 interface FileItemProps {
   name: string;
-  type: string;
   term?: string;
   selected?: boolean;
   onSelect?: (checked: boolean) => void;
   onClick?: () => void;
+  onOpen?: () => void;
   onRename?: (name: string) => void;
   onMove?: () => void;
   onDelete?: () => void;
@@ -67,7 +67,7 @@ const FileItemOptionMenu = ({ onSelectMenuOption }: { onSelectMenuOption: (actio
   )
 }
 
-const FileItem = ({ name, type, term = '', selected, onSelect, onRename, onMove, onDelete, showCheckbox }: FileItemProps) => {
+const FileItem = ({ name, term = '', selected, onSelect, onOpen, onRename, onMove, onDelete, showCheckbox }: FileItemProps) => {
   const fileNameSpanRef = useRef<HTMLDivElement>(null)
   const [renameInputValue, setRenameInputValue] = useState<string>()
   const renameInputRef = useRef<HTMLInputElement>(null)
@@ -105,7 +105,7 @@ const FileItem = ({ name, type, term = '', selected, onSelect, onRename, onMove,
   const handleMenuOptionSelect = (actionType: OptionMenuActionType) => {
     switch (actionType) {
       case 'open':
-        // TODO: Implement open
+        onOpen?.()
         break;
       case 'rename':
         setRenameInputValue(name.split('.').slice(0, -1).join('.'))
@@ -127,7 +127,7 @@ const FileItem = ({ name, type, term = '', selected, onSelect, onRename, onMove,
     <div
       className="flex gap-2 items-center rounded-md bg-muted p-2 w-full group hover:opacity-75 cursor-pointer"
       onClick={() => {
-        showCheckbox && onSelect?.(!selected)
+        showCheckbox ? onSelect?.(!selected) : onOpen?.()
       }}>
       <div className="rounded-md text-primary p-2">
         <IconFile />

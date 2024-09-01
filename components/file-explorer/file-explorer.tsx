@@ -36,6 +36,7 @@ export function FileExplorer({ userId }: { userId: string }) {
     clearSelectedItems,
     navigateToFolder,
     navigateToFolderAtIndex,
+    openFile,
     moveItems,
     renameItem,
     searchQuery,
@@ -225,10 +226,10 @@ export function FileExplorer({ userId }: { userId: string }) {
                 >
                   <FileItem
                     name={item.name}
-                    type={item.type}
                     term={searchQuery}
                     selected={isItemSelected(item.path)}
                     onSelect={() => toggleSelectItem(item)}
+                    onOpen={() => openFile(item.path)}
                     onRename={(name) => renameItem(item, name)}
                     onMove={() => {
                       toggleSelectItem(item)
