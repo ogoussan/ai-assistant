@@ -7,16 +7,13 @@ import { formatPath, getNameFromPath, slicePath } from "./path.helper"
 
 
 export const previewPDF = async (path: string) => {
-    console.log('preview')
     const blob = await downloadObject(path)
 
-    console.log('blob', blob)
     const url = URL.createObjectURL(blob)
     window.open(url, '_blank')
 };
 
 export const aggregateFileExplorerItems = async (userId: string): Promise<FileExplorerItem[]> => {
-    console.log('aggregating')
     const objectPaths = await fetchObjectPaths(userId)
     const files: FileExplorerFile[] = objectPaths
         .map((objectPath) => {

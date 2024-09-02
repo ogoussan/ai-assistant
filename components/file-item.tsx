@@ -83,7 +83,6 @@ const FileItem = ({ name, term = '', selected, onSelect, onOpen, onRename, onMov
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (renameInputValue && renameInputRef.current && !renameInputRef.current.contains(event.target as Node)) {
-        console.log('outside')
         onRename?.(renameInputValue)
         setRenameInputValue(undefined)
       }

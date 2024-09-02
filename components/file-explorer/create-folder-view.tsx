@@ -67,8 +67,7 @@ export function CreateFolder({ selectedItems, currentFolder, moveItems, clearSel
           <div className="opacity-60" key={path}>
             {type === 'file' ? (
               <FileItem
-                name={name.split('.').slice(0, -1).join('.')}
-                type={name.split('.').pop()!}
+                name={name.split('.').slice(0, -1).join('.')}         
               />
             ) : (
               <FolderItem name={name} />

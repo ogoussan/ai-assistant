@@ -5,7 +5,6 @@ export const slicePath = (path: string, start?: number, end?: number) =>
     path.split('/').filter(Boolean).slice(start, end).join('/')
 
 export const splitFileName = (name: string): [string, string] => {
-    console.log('received name', name)
     const extension = name.split('.').pop() || ''
     const nameWithoutExtension = name.split('.').slice(0, -1).join('.')
 

@@ -149,7 +149,6 @@ export const useFileExplorer = (userId: string) => {
     const openFile = async (path: string) => {
         const response = await fetch(`/api/file?path=${encodeURIComponent(path)}`)
         const blob = await response.blob()
-        console.log('Blob', blob)
         const url = URL.createObjectURL(blob)
         window.open(url, '_blank')
 
