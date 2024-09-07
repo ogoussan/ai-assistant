@@ -10,7 +10,8 @@ import { IconSidebar } from '@/components/ui/icons'
 interface SidebarMobileProps {
   children: React.ReactNode
   icon?: React.ReactNode
-  side?: 'left' | 'right'
+  side?: 'left' | 'right',
+  width?: number,
 }
 
 export function SidebarMobile({ children, icon, side = 'left' }: SidebarMobileProps) {

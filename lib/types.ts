@@ -73,3 +73,26 @@ export interface FileExplorerFolder extends FileExplorerBase {
 }
 
 export type FileExplorerItem = FileExplorerFolder | FileExplorerFile
+
+export type Language =
+| 'css'
+| 'dockerfile'
+| 'graphql'
+| 'html'
+| 'javascript'
+| 'json'
+| 'kotlin'
+| 'markdown'
+| 'mysql'
+| 'php'
+| 'plaintext'
+| 'powerquery'
+| 'powershell'
+| 'python'
+| 'scss'
+| 'shell'
+| 'sql'
+| 'typescript'
+| 'xml'
+| 'yaml';
+

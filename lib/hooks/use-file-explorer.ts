@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { FileExplorerFolder, FileExplorerItem } from "../types"
-import { aggregateFileExplorerItems, previewPDF } from "../file-explorer"
+import { aggregateFileExplorerItems } from "../file-explorer"
 import Fuse from "fuse.js"
 import { createEmptyFolder, deleteObject, moveObject } from "../knowledge-base/s3"
-import { getPathFileExtension, slicePath, splitFileName } from "../path.helper"
+import { slicePath, splitFileName } from "../path.helper"
 import { PLACEHOLDER_FILE_NAME } from "@/constants/file-constants"
 
 export const useFileExplorer = (userId: string) => {
@@ -144,16 +144,7 @@ export const useFileExplorer = (userId: string) => {
 
     const clearSelectedItems = useCallback(() => {
         setSelectedItems([])
-    }, [])
-
-    const openFile = async (path: string) => {
-        const response = await fetch(`/api/file?path=${encodeURIComponent(path)}`)
-        const blob = await response.blob()
-        const url = URL.createObjectURL(blob)
-        window.open(url, '_blank')
-
-        Promise.resolve()
-    }
+    }, []) 
 
     const renameItem = useCallback(async (item: FileExplorerItem, name: string) => {
         const [nameWithoutExtension, extension] = splitFileName(item.name)
@@ -284,7 +275,6 @@ export const useFileExplorer = (userId: string) => {
         clearSelectedItems,
         navigateToFolder,
         navigateToFolderAtIndex,
-        openFile,
         moveItems,
         renameItem,
         searchQuery,

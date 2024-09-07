@@ -1,5 +1,6 @@
 export const textBasedFileTypes = [
     '.ts',
+    '.tsx',
     'application/json',
     'text/markdown',
     'application/javascript',

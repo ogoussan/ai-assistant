@@ -9,7 +9,6 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { ReactNode } from 'react'
 import { FileData } from '@/lib/types'
-import { TruncatedText } from './truncate-text'
 
 export function renderMessage(type: string, content: string | FileData): ReactNode {
   const messageMap = {

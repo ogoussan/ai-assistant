@@ -20,6 +20,8 @@ import { CreateFolder } from "./create-folder-view"
 import BreadcrumbNavigation from "./breadcrumb-navigation"
 import { FileExplorerButton, FileExplorerButtonProps } from "./file-explorer-button"
 import { Skeleton } from "../ui/skeleton"
+import { FileDialog } from "./file-dialog"
+import { FileData, FileExplorerFile } from "@/lib/types"
 
 type DisplayStatus = 'standard' | 'create-folder' | 'move'
 
@@ -36,7 +38,6 @@ export function FileExplorer({ userId }: { userId: string }) {
     clearSelectedItems,
     navigateToFolder,
     navigateToFolderAtIndex,
-    openFile,
     moveItems,
     renameItem,
     searchQuery,
@@ -48,6 +49,7 @@ export function FileExplorer({ userId }: { userId: string }) {
   const [displayStatus, setDisplayStatus] = useState<DisplayStatus>('standard')
   const [isSelecting, setIsSelecting] = useState(false)
   const [isSelectionDisabled, setIsSelectionDisabled] = useState(false)
+  const [openedFileItem, setOpenedFileItem] = useState<FileExplorerFile>()
 
   const getButtonAnimationProps = (isVisible: boolean) => ({
     initial: {
@@ -137,69 +139,96 @@ export function FileExplorer({ userId }: { userId: string }) {
         selectedItems={selectedItems}
         currentFolder={currentFolder}
         moveItems={(path) => moveItems(path).then(
-          () => {setIsSelecting(false)
-        })}
+          () => {
+            setIsSelecting(false)
+          })}
         clearSelectedItems={clearSelectedItems}
         setDisplayStatus={setDisplayStatus}
       />
     )
   }
 
+  const openFile = async (item: FileExplorerFile) => {
+    // const response = await fetch(`/api/file?path=${encodeURIComponent(path)}`)
+    // const blob = await response.blob()
+    // const url = URL.createObjectURL(blob)
+    // window.open(url, '_blank')
+
+    // Promise.resolve()
+    setOpenedFileItem(item)
+  }
+
+  const handleOnOpenChange = (open?: boolean) => {
+    if (!open) {
+      setOpenedFileItem(undefined)
+    }
+  }
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden gap-4 mt-[3rem] mx-2">
-      <div className="relative pr-4">
-        <Input
-          placeholder="Search"
-          className="pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-      </div>
-      {!searchQuery.trim() && (
-        <BreadcrumbNavigation
-          navigationFolderStack={navigationFolderStack}
-          displayStatus={displayStatus}
-          clearSelectedItems={clearSelectedItems}
-          navigateToFolderAtIndex={navigateToFolderAtIndex}
-        />
+    <>
+      {!!openedFileItem && (
+        <div className="p-2">
+          <FileDialog
+            open={true} 
+            file={openedFileItem} 
+            onOpenChange={handleOnOpenChange} 
+          />
+        </div>
       )}
-      {(
-        <div className="flex flex-col gap-2 overflow-y-scroll pr-4">
-          {!isSelectionDisabled && (!isSelecting ? (
-            <Button className="ml-auto flex gap-2 hover:bg-background border-2 border-secondary" variant="secondary" onClick={() => {
-              setIsSelecting(true)
-            }}>
-              <small className="text-xs">select items</small>
-              <SquareCheck size={16} opacity={0.5} />
-            </Button>
-          ) : (
-            <motion.div
-              className="flex items-center gap-2"
-              initial={{ translateX: 10 }}
-              animate={{ translateX: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Button className="ml-auto flex gap-2" variant="outline" onClick={() => {
-                setIsSelecting(false)
-                clearSelectedItems()
+      <div className="flex flex-col h-screen overflow-hidden gap-4 mt-[3rem] mx-2">
+        <div className="relative pr-4">
+          <Input
+            placeholder="Search"
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        </div>
+        {!searchQuery.trim() && (
+          <BreadcrumbNavigation
+            navigationFolderStack={navigationFolderStack}
+            displayStatus={displayStatus}
+            clearSelectedItems={clearSelectedItems}
+            navigateToFolderAtIndex={navigateToFolderAtIndex}
+          />
+        )}
+        {(
+          <div className="flex flex-col gap-2 overflow-y-scroll pr-4">
+            {!isSelectionDisabled && (!isSelecting ? (
+              <Button className="ml-auto flex gap-2 hover:bg-background border-2 border-secondary" variant="secondary" onClick={() => {
+                setIsSelecting(true)
               }}>
-                <small className="text-xs">cancel select</small>
-                <CircleX size={16} opacity={0.5} />
+                <small className="text-xs">select items</small>
+                <SquareCheck size={16} opacity={0.5} />
               </Button>
-              <div className="p-1 border-solid border-2 rounded-md">
-                <Checkbox
-                  checked={areAllSelected}
-                  onCheckedChange={(checked) => checked
-                    ? selectedAllItems()
-                    : clearSelectedItems()
-                  }
-                />
-              </div>
-            </motion.div>
-          ))}
-          {isLoading && <Skeleton className="w-full h-[56px] rouded-md" />} 
-          {visibleFolders.map((item) => (
+            ) : (
+              <motion.div
+                className="flex items-center gap-2"
+                initial={{ translateX: 10 }}
+                animate={{ translateX: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Button className="ml-auto flex gap-2" variant="outline" onClick={() => {
+                  setIsSelecting(false)
+                  clearSelectedItems()
+                }}>
+                  <small className="text-xs">cancel select</small>
+                  <CircleX size={16} opacity={0.5} />
+                </Button>
+                <div className="p-1 border-solid border-2 rounded-md">
+                  <Checkbox
+                    checked={areAllSelected}
+                    onCheckedChange={(checked) => checked
+                      ? selectedAllItems()
+                      : clearSelectedItems()
+                    }
+                  />
+                </div>
+              </motion.div>
+            ))}
+            {isLoading && <Skeleton className="w-full h-[56px] rouded-md" />}
+            {visibleFolders.map((item) => (
               <motion.div
                 key={item.path}
                 className="flex justify-end mt-auto"
@@ -219,37 +248,38 @@ export function FileExplorer({ userId }: { userId: string }) {
               </motion.div>
             ))}
             {visibleFiles.map((item) => (
-                <motion.div
-                  key={item.path}
-                  className="flex justify-end mt-auto"
-                  {...itemAnimation}
-                >
-                  <FileItem
-                    name={item.name}
-                    term={searchQuery}
-                    selected={isItemSelected(item.path)}
-                    onSelect={() => toggleSelectItem(item)}
-                    onOpen={() => openFile(item.path)}
-                    onRename={(name) => renameItem(item, name)}
-                    onMove={() => {
-                      toggleSelectItem(item)
-                      setDisplayStatus('move')
-                      setIsSelecting(false)
-                    }}
-                    onDelete={() => {
-                      deleteItems([item])
-                    }}
-                    showCheckbox={isSelecting}
-                  />
-                </motion.div>
-              ))}
-        </div>
-      )}
-      <FileExplorerButton {...moveHereButtonProps} />
-      <FileExplorerButton {...moveHereCancelButtonProps} />
-      <FileExplorerButton {...createFolderWithItemsButtonProps} />
-      <FileExplorerButton {...moveSelectedItemProps} />
-      <FileExplorerButton {...deleteSelectedItemsProp} />
-    </div>
+              <motion.div
+                key={item.path}
+                className="flex justify-end mt-auto"
+                {...itemAnimation}
+              >
+                <FileItem
+                  name={item.name}
+                  term={searchQuery}
+                  selected={isItemSelected(item.path)}
+                  onSelect={() => toggleSelectItem(item)}
+                  onOpen={() => openFile(item)}
+                  onRename={(name) => renameItem(item, name)}
+                  onMove={() => {
+                    toggleSelectItem(item)
+                    setDisplayStatus('move')
+                    setIsSelecting(false)
+                  }}
+                  onDelete={() => {
+                    deleteItems([item])
+                  }}
+                  showCheckbox={isSelecting}
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
+        <FileExplorerButton {...moveHereButtonProps} />
+        <FileExplorerButton {...moveHereCancelButtonProps} />
+        <FileExplorerButton {...createFolderWithItemsButtonProps} />
+        <FileExplorerButton {...moveSelectedItemProps} />
+        <FileExplorerButton {...deleteSelectedItemsProp} />
+      </div>
+    </>
   )
 }
