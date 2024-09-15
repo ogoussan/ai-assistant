@@ -107,11 +107,11 @@ export function FileDialog({ file, ...props }: FileDialogProps) {
       {false && <DialogOverlay />}
       <DialogContent className="max-w-none">
         <DialogTitle>{file.name}</DialogTitle>
-        <div className="space-y-1 text-sm border rounded-md">
+        <div className="space-y-1 text-sm border rounded-md bg-zinc-200">
           {pdfUrl ? (
             <PdfViewer url={pdfUrl} />
           ) : fileContent !== null ? (
-            <div className='max-h-[80vh] overflow-y-scroll'>
+            <div className='dark:bg-zinc-900 max-h-[80vh] bg-zinc-200 overflow-y-scroll'>
               <CodeEditor
                 value={fileContent}
                 language={language}
@@ -119,7 +119,8 @@ export function FileDialog({ file, ...props }: FileDialogProps) {
                 onChange={(evn) => setFileContent(evn.target.value)}
                 padding={15}
                 style={{
-                  fontSize: 12,
+                  fontWeight: 700,
+                  fontSize: 14,
                   fontFamily: 'ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace',
                 }}
               />
