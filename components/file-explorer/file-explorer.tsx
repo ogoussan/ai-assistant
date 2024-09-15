@@ -1,5 +1,5 @@
 'use client'
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import {
   CircleX,
   FolderInputIcon,
@@ -21,7 +21,8 @@ import BreadcrumbNavigation from "./breadcrumb-navigation"
 import { FileExplorerButton, FileExplorerButtonProps } from "./file-explorer-button"
 import { Skeleton } from "../ui/skeleton"
 import { FileDialog } from "./file-dialog"
-import { FileData, FileExplorerFile } from "@/lib/types"
+import { toast } from "sonner"
+import { FileExplorerFile } from "@/lib/types"
 
 type DisplayStatus = 'standard' | 'create-folder' | 'move'
 

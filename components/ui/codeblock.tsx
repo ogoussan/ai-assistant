@@ -1,9 +1,6 @@
-// Inspired by Chatbot-UI and modified to fit the needs of this project
-// @see https://github.com/mckaywrigley/chatbot-ui/blob/main/components/Markdown/CodeBlock.tsx
-
 'use client'
 
-import { FC, memo } from 'react'
+import { FC, memo, useState, useRef } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { coldarkDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
@@ -14,6 +11,7 @@ import { Button } from '@/components/ui/button'
 interface Props {
   language: string
   value: string
+  editable?: boolean // Add the editable prop
 }
 
 interface languageMap {
@@ -56,8 +54,10 @@ export const generateRandomString = (length: number, lowercase = false) => {
   return lowercase ? result.toLowerCase() : result
 }
 
-const CodeBlock: FC<Props> = memo(({ language, value }) => {
+const CodeBlock: FC<Props> = memo(({ language, value, editable = false }) => {
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
+  const [code, setCode] = useState(value)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const downloadAsFile = () => {
     if (typeof window === 'undefined') {
@@ -75,7 +75,7 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
       return
     }
 
-    const blob = new Blob([value], { type: 'text/plain' })
+    const blob = new Blob([code], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.download = fileName
@@ -89,7 +89,17 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
 
   const onCopy = () => {
     if (isCopied) return
-    copyToClipboard(value)
+    copyToClipboard(code)
+  }
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCode(e.target.value)
+  }
+
+  const handleInteraction = () => {
+    if (textareaRef.current) {
+      textareaRef.current.focus()
+    }
   }
 
   return (
@@ -117,32 +127,73 @@ const CodeBlock: FC<Props> = memo(({ language, value }) => {
           </Button>
         </div>
       </div>
-      <SyntaxHighlighter
-        language={language}
-        style={coldarkDark}
-        PreTag="div"
-        showLineNumbers
-        customStyle={{
-          margin: 0,
-          width: '100%',
-          background: 'transparent',
-          padding: '1.5rem 1rem'
-        }}
-        lineNumberStyle={{
-          userSelect: 'none'
-        }}
-        codeTagProps={{
-          style: {
-            fontSize: '0.9rem',
-            fontFamily: 'var(--font-mono)'
-          }
-        }}
-      >
-        {value}
-      </SyntaxHighlighter>
+      {editable ? (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={handleInteraction}
+          onKeyDown={handleInteraction}
+          className="relative"
+        >
+          <textarea
+            ref={textareaRef}
+            className="absolute inset-0 resize-none bg-transparent p-2 font-mono text-white caret-white outline-none"
+            value={code}
+            onChange={handleTextareaChange}
+          />
+          <SyntaxHighlighter
+            language={language}
+            style={coldarkDark}
+            PreTag="div"
+            showLineNumbers
+            customStyle={{
+              margin: 0,
+              width: '100%',
+              background: 'transparent',
+              padding: '1.5rem 1rem'
+            }}
+            lineNumberStyle={{
+              userSelect: 'none'
+            }}
+            codeTagProps={{
+              style: {
+                fontSize: '0.9rem',
+                fontFamily: 'var(--font-mono)'
+              }
+            }}
+          >
+            {code}
+          </SyntaxHighlighter>
+        </div>
+      ) : (
+        <SyntaxHighlighter
+          language={language}
+          style={coldarkDark}
+          PreTag="div"
+          showLineNumbers
+          customStyle={{
+            margin: 0,
+            width: '100%',
+            background: 'transparent',
+            padding: '1.5rem 1rem'
+          }}
+          lineNumberStyle={{
+            userSelect: 'none'
+          }}
+          codeTagProps={{
+            style: {
+              fontSize: '0.9rem',
+              fontFamily: 'var(--font-mono)'
+            }
+          }}
+        >
+          {value}
+        </SyntaxHighlighter>
+      )}
     </div>
   )
 })
+
 CodeBlock.displayName = 'CodeBlock'
 
 export { CodeBlock }

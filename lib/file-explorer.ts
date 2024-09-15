@@ -3,9 +3,6 @@ import { downloadObject, fetchObjectPaths } from "./knowledge-base/s3"
 import { FileExplorerFile, FileExplorerFolder, FileExplorerItem } from "./types"
 import { formatPath, getNameFromPath, slicePath } from "./path.helper"
 
-
-
-
 export const previewPDF = async (path: string) => {
     const blob = await downloadObject(path)
 

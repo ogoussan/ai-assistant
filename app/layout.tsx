@@ -48,7 +48,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         )}
       ><StackProvider app={stackServerApp}>
         <StackTheme>
-          <Toaster position="top-center" />
+          <Toaster richColors position="top-center" />
           <Providers
             attribute="class"
             defaultTheme="system"

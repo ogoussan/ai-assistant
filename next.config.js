@@ -1,8 +1,12 @@
 const withCSS = require("@zeit/next-css");
 const withFonts = require("next-fonts");
 const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
+const removeImports = require("next-remove-imports")();
 
 module.exports = withCSS(
+  removeImports({
+    experimental: { esmExternals: true }
+  }),
   withFonts({
     images: {
       remotePatterns: [
