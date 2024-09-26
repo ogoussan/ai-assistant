@@ -55,7 +55,10 @@ const FileItemOptionMenu = ({ onSelectMenuOption }: { onSelectMenuOption: (actio
             <DropdownMenuItem
               key={type}
               className="flex gap-2 px-4 py-2 items-cente hover:opacity-50"
-              onClick={() => onSelectMenuOption(type)}
+              onClick={(event) => {
+                event.stopPropagation()
+                onSelectMenuOption(type)
+              }}
             >
               {icon()}
               <b className="text-xs">{label}</b>
@@ -124,7 +127,7 @@ const FileItem = ({ name, term = '', selected, onSelect, onOpen, onRename, onMov
 
   return (
     <div
-      className="flex gap-2 items-center rounded-md bg-muted p-2 w-full group hover:opacity-75 cursor-pointer"
+      className="flex gap-2 items-center rounded-md bg-muted p-2 w-full cursor-pointer"
       onClick={() => {
         showCheckbox ? onSelect?.(!selected) : onOpen?.()
       }}>
