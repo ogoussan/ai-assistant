@@ -66,9 +66,10 @@ export const aggregateFileExplorerItems = async (userId: string): Promise<FileEx
         })
     });
 
+    const filteredFiles = files.filter((file) => file.name !== PLACEHOLDER_FILE_NAME)
 
     return [
         ...folders,
-        ...files
+        ...filteredFiles
     ]
 }
