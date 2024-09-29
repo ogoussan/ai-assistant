@@ -74,7 +74,7 @@ export function Chat({ id, className, userId, missingKeys }: ChatProps) {
       ref={scrollRef}
     >
       <div
-        className={cn('flex flex-1 pt-4 md:pt-10', className)}
+        className={cn('flex-1 pt-4 md:pt-10', className)}
         ref={messagesRef}
       >
         <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} isLoading={isRespondLoading} />

@@ -19,7 +19,7 @@ export function ChatList({ messages = [], isShared, streamedResponse, isLoading 
  const user = useUser()
 
   return (
-    <div className="p-4">
+    <div className="p-8">
       {!isShared && !user ? (
         <>
           <div className="group relative mb-4 flex items-start">
