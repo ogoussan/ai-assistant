@@ -10,10 +10,8 @@ export const useScrollAnchor = () => {
 
   const scrollToBottom = useCallback(() => {
     if (messagesRef.current) {
-      messagesRef.current.scrollIntoView({
-        block: 'end',
-        behavior: 'smooth'
-      })
+      console.log(messagesRef.current)
+      messagesRef.current.scrollTo(0, messagesRef.current.scrollHeight)
     }
   }, [])
 

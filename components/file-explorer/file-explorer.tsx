@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import {
   CircleX,
   FolderInputIcon,
@@ -21,7 +21,6 @@ import BreadcrumbNavigation from "./breadcrumb-navigation"
 import { FileExplorerButton, FileExplorerButtonProps } from "./file-explorer-button"
 import { Skeleton } from "../ui/skeleton"
 import { FileDialog } from "./file-dialog"
-import { toast } from "sonner"
 import { FileExplorerFile } from "@/lib/types"
 
 type DisplayStatus = 'standard' | 'create-folder' | 'move'
@@ -150,19 +149,11 @@ export function FileExplorer({ userId }: { userId: string }) {
   }
 
   const openFile = async (item: FileExplorerFile) => {
-    // const response = await fetch(`/api/file?path=${encodeURIComponent(path)}`)
-    // const blob = await response.blob()
-    // const url = URL.createObjectURL(blob)
-    // window.open(url, '_blank')
-
-    // Promise.resolve()
     setOpenedFileItem(item)
   }
 
-  const handleOnOpenChange = (open?: boolean) => {
-    if (!open) {
-      setOpenedFileItem(undefined)
-    }
+  const closeFileItem = () => {
+    setOpenedFileItem(undefined);
   }
 
   return (
@@ -172,11 +163,11 @@ export function FileExplorer({ userId }: { userId: string }) {
           <FileDialog
             open={true} 
             file={openedFileItem} 
-            onOpenChange={handleOnOpenChange} 
+            onOpenChange={closeFileItem} 
           />
         </div>
       )}
-      <div className="flex flex-col h-screen overflow-hidden gap-4 mt-[3rem] mx-2">
+      <div className="flex flex-col overflow-hidden gap-4 m-4">
         <div className="relative pr-4">
           <Input
             placeholder="Search"
@@ -195,7 +186,7 @@ export function FileExplorer({ userId }: { userId: string }) {
           />
         )}
         {(
-          <div className="flex flex-col gap-2 overflow-y-scroll pr-4">
+          <div className="flex flex-col gap-2 max-w-[75vh] overflow-y-scroll pr-4">
             {!isSelectionDisabled && (!isSelecting ? (
               <Button className="ml-auto flex gap-2 hover:bg-background border-2 border-secondary" variant="secondary" onClick={() => {
                 setIsSelecting(true)

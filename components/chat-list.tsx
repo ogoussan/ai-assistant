@@ -19,10 +19,10 @@ export function ChatList({ messages = [], isShared, streamedResponse, isLoading 
  const user = useUser()
 
   return (
-    <div className="relative mx-auto max-w-2xl px-4">
+    <div className="p-4">
       {!isShared && !user ? (
         <>
-          <div className="group relative mb-4 flex items-start md:-ml-12">
+          <div className="group relative mb-4 flex items-start">
             <div className="bg-background flex size-[25px] shrink-0 select-none items-center justify-center rounded-md border shadow-sm">
               <ExclamationTriangleIcon />
             </div>
@@ -43,7 +43,6 @@ export function ChatList({ messages = [], isShared, streamedResponse, isLoading 
           <Separator className="my-4" />
         </>
       ) : null}
-
       {messagesWithStreamedResponse.map((message, index) => (
         <div key={message.id}>
           {renderMessage(message.type, message.content as string)}
