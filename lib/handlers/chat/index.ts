@@ -10,7 +10,7 @@ import { addDocuments } from "@/lib/knowledge-base/pinecone";
 
 export const chatHandler = async (request: Request) => {
 
-    const { id: userId } = await stackServerApp.getUser({ or: 'redirect' })
+    const { id: userId } = await stackServerApp.getUser()
 
     try {
         const contentType = request.headers.get('Content-Type') || '';
