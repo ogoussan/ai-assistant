@@ -140,7 +140,6 @@ export async function shareChat(id: string) {
 
 export async function saveChat(chat: Chat) {
   const user = await stackServerApp.getUser()
-  console.log(`[app/actions - saveChat]: Saving chat ${JSON.stringify(chat, null, 2)}`)
 
   if (user) {
     const pipeline = kv.pipeline()

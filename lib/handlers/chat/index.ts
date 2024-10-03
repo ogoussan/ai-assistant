@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf";
 import { respondToUserMessage } from "@/lib/assistant/chat-completion";
 import { nanoid } from "@/lib/utils";
 import { FileData, Message } from "@/lib/types";
@@ -7,9 +6,7 @@ import { Document } from "langchain/document";
 import { uploadFile } from "@/lib/knowledge-base/s3";
 import { stackServerApp } from "@/stack";
 import { loadFile } from "@/lib/loaders";
-
-
-const MAX_FILE_CONTENT_LENGTH = 20_000
+import { addDocuments } from "@/lib/knowledge-base/pinecone";
 
 export const chatHandler = async (request: Request) => {
 
@@ -24,7 +21,7 @@ export const chatHandler = async (request: Request) => {
             const chatId = formData.get('chatId') as string
             const files = formData.getAll('files') as Blob[]
 
-            let documentsCollection: Document[][] = []
+    
 
             await Promise.all(files.map(async (blobFile) => {
                 const file: FileData = {
@@ -34,26 +31,20 @@ export const chatHandler = async (request: Request) => {
                     type: blobFile.type,
                 }
 
-                const arrayBuffer = await blobFile.arrayBuffer()
-                const documents = await loadFile(blobFile)
-                documentsCollection.push(documents)
-
                 if (userId) {
                     const result = await uploadFile(file, userId)
+                    const documents = await loadFile(blobFile)
+                    const documentsIds = documents.map((_, index) => `${file.name}-${nanoid()}#${index}`)
                     console.log('File uploaded successfully:', result)
+                    await addDocuments(documents, documentsIds)
+                    console.log('File was successfully digested')
                 }
             }))
-
-            const flattenedDocumentCollection = documentsCollection.flat()
-
-            const fullText = (flattenedDocumentCollection.map(({ pageContent }) => pageContent) as string[]).join()
+        
             const message: Message = {
                 id: nanoid(),
                 type: 'user',
-                content: `${formData.get('message') as string} ${files.length && flattenedDocumentCollection[0]?.pageContent
-                    ? 'use this file content as context: ' + fullText.substring(0, MAX_FILE_CONTENT_LENGTH)
-                    : ''
-                }`,
+                content: formData.get('message')  as string
             }
 
             const stream = await respondToUserMessage(message, previousMessages, chatId)

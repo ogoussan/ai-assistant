@@ -1,6 +1,6 @@
 'use client';
 import { LEFT_PANEL, RIGHT_PANEL } from "@/constants/storage-keys";
-import { PropsWithChildren, useCallback, useState } from "react";
+import { PropsWithChildren, ReactNode, useCallback, useState } from "react";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 import { FileExplorer } from "./file-explorer/file-explorer";
@@ -12,7 +12,13 @@ interface containerStatus {
     rightPanelOpened: boolean,
 }
 
-const ContentContainer = ({ children }: PropsWithChildren) => {
+interface ContentContainerProps {
+    children: ReactNode,
+    isAuthenticated?: boolean,
+    containerClassName?: string,
+}
+
+const ContentContainer = ({ children, isAuthenticated, containerClassName = "flex flex-1 w-screen justify-between" }: ContentContainerProps) => {
     const [status, setStatus] = useState<containerStatus>({
         leftPanelOpened
             : localStorage.getItem(LEFT_PANEL) === 'true',
@@ -45,20 +51,23 @@ const ContentContainer = ({ children }: PropsWithChildren) => {
         })
     }, [status.rightPanelOpened]);
 
+    console.log("authenticated: ", isAuthenticated)
+
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col justify-between items-center h-screen">
             <Header 
                 toggleLeftPanel={toggleLeftPanel} 
-                toggleRightPanel={toggleRightPanel} 
+                toggleRightPanel={toggleRightPanel}
+                showItems={isAuthenticated}
             />
-            <div className="flex">
-                {status.leftPanelOpened && (
+            <div className={containerClassName}>
+                {status.leftPanelOpened && isAuthenticated && (
                     <Sidebar>
                         <ChatHistory />
                     </Sidebar>
                 )}
                 {children}
-                {status.rightPanelOpened && user && (
+                {status.rightPanelOpened && isAuthenticated && user && (
                     <Sidebar>
                         <FileExplorer userId={user.id} />
                     </Sidebar>

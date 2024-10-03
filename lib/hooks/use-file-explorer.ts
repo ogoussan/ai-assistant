@@ -137,7 +137,6 @@ export const useFileExplorer = (userId: string) => {
     )
 
     const selectedAllItems = useCallback(() => {
-        console.log('select all', visibleItems)
         setSelectedItems(visibleItems)
     }, [visibleItems])
 

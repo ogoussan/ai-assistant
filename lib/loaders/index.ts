@@ -3,8 +3,9 @@ import { HTMLLoader } from "./html-loaders"
 import { JSONLoader } from "./json-loader"
 import { PlainTextLoader } from "./plain-text-loader"
 import { Document } from "langchain/document"
+import { PdfLoader } from "./pdf-loader"
 
-export const loadFile = (blob: Blob): Document[] => {
+export const loadFile = async (blob: Blob): Promise<Document[]> => {
     const {type} = blob
     
     if (!type) {
@@ -14,11 +15,10 @@ export const loadFile = (blob: Blob): Document[] => {
     const loaderMap = {
         'application/json': JSONLoader,
         'text/html': HTMLLoader,
-        'application/pdf': WebPDFLoader,
+        'application/pdf': PdfLoader,
+        'default': PlainTextLoader
     }
 
-    const Loader = loaderMap[type] || PlainTextLoader
-
-    const loader = new Loader(blob)
-    return loader.load()
+    const loader = new (loaderMap[type] || loaderMap['default'])(blob);
+    return loader.load();
 }

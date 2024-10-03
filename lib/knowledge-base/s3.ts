@@ -65,8 +65,6 @@ export const downloadObject = async (path: string) => {
     })
   )
 
-  console.log('Result body: ', result.Body)
-
   return await _streamToBlob(result.Body)
 };
 

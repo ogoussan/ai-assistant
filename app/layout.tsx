@@ -46,26 +46,21 @@ export default function RootLayout({ children }: RootLayoutProps) {
           GeistSans.variable,
           GeistMono.variable
         )}
-      ><StackProvider app={stackServerApp}>
-        <StackTheme>
-          <Toaster richColors position="top-center" />
-          <Providers
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <div className="flex flex-col min-h-screen">
-              <ContentContainer>
-                <main className="flex flex-col flex-1 bg-muted/50 w-[calc(100vw-700px)]">
-                  {children}
-                </main>
-              </ContentContainer>
-            </div>
-            <TailwindIndicator />
-          </Providers>
-      </StackTheme>
-      </StackProvider></body>
+      >
+        <StackProvider app={stackServerApp}>
+          <StackTheme>
+            <Toaster richColors position="top-center" />
+            <Providers
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </Providers>
+          </StackTheme>
+        </StackProvider>
+      </body>
     </html>
   )
 }

@@ -1,9 +1,10 @@
+import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf"
 import { BaseDocumentLoader } from "@langchain/core/document_loaders/base"
 import { BaseDocumentTransformer } from "@langchain/core/documents"
 import { Document } from "langchain/document"
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter"
 
-export class JSONLoader implements BaseDocumentLoader {
+export class PdfLoader implements BaseDocumentLoader {
     private blob
     
     constructor(blob) {
@@ -11,14 +12,14 @@ export class JSONLoader implements BaseDocumentLoader {
     }
 
     async load(): Promise<Document[]> {
-        const text = await this.blob.text();
-        const formattedJsonText = JSON.stringify(text, undefined, 2)
+        const documents = await new WebPDFLoader(this.blob).load();
+
         const splitter = new RecursiveCharacterTextSplitter({
             chunkSize: 800,
             chunkOverlap: 400,
         });
         
-        return splitter.createDocuments([formattedJsonText]);
+        return splitter.createDocuments(documents.map(({pageContent}) => pageContent));
     }
 
     async loadAndSplit(): Promise<Document[]> {

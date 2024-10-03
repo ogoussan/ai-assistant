@@ -13,7 +13,7 @@ export function Sidebar({ className, children }: SidebarProps) {
   return (
     <div
       data-state={isSidebarOpen && !isLoading ? 'open' : 'closed'}
-      className={cn(className, ' w-[300px] h-auto flex-col dark:bg-zinc-950 z-10')}
+      className={cn(className, ' w-[300px] h-auto flex-col dark:bg-zinc-950 z-10 border')}
     >
       {children}
     </div>

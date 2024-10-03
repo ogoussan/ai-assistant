@@ -70,7 +70,7 @@ export function Chat({ id, className, userId, missingKeys }: ChatProps) {
 
   return (
     <div
-      className="flex flex-col group w-full overflow-auto pl-0 peer-[[data-state=open]]:lg:pl-[250px] peer-[[data-state=open]]:xl:pl-[300px]"
+      className="flex flex-col flex-1 group overflow-auto"
       ref={scrollRef}
     >
       <div
@@ -78,6 +78,7 @@ export function Chat({ id, className, userId, missingKeys }: ChatProps) {
         ref={messagesRef}
       >
         <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} isLoading={isRespondLoading} />
+
         <div className="w-full h-px" ref={visibilityRef} />
       </div>
       <ChatPanel

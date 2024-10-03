@@ -25,8 +25,7 @@ export function useChatMessages(chatId: string,  userId?: string) {
             if (!messages.length || !userId) {
                 setIsPending(false) 
                 return
-            }
-            console.log('[UseChatMessages] - Saving changes made to chat')
+            } 
             
             const createdAt = new Date()
             const path = `/chat/${chatId}`

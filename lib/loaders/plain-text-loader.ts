@@ -1,6 +1,6 @@
 import { BaseDocumentLoader } from "@langchain/core/document_loaders/base"
-import { BaseDocumentTransformer } from "@langchain/core/documents"
 import { Document } from "langchain/document"
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 export class PlainTextLoader implements BaseDocumentLoader {
     private blob
@@ -11,11 +11,15 @@ export class PlainTextLoader implements BaseDocumentLoader {
 
     async load() {
         const text = await this.blob.text();
-        const {name, type, size} = this.blob
-        return [{ pageContent: text, metadata: {name, type, size} }];
+        const splitter = new RecursiveCharacterTextSplitter({
+            chunkSize: 800,
+            chunkOverlap: 400,
+        });
+        
+        return splitter.createDocuments([text]);
     }
 
-    async loadAndSplit(splitter?: BaseDocumentTransformer): Promise<Document[]> {
+    async loadAndSplit(): Promise<Document[]> {
         return []
     }
 }

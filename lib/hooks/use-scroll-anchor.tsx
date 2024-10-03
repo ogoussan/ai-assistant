@@ -9,8 +9,7 @@ export const useScrollAnchor = () => {
   const [isVisible, setIsVisible] = useState(false)
 
   const scrollToBottom = useCallback(() => {
-    if (messagesRef.current) {
-      console.log(messagesRef.current)
+    if (messagesRef.current) { 
       messagesRef.current.scrollTo(0, messagesRef.current.scrollHeight)
     }
   }, [])
