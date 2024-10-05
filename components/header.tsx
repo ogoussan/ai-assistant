@@ -13,7 +13,7 @@ interface HeaderProps {
 export function Header({toggleLeftPanel, toggleRightPanel, showItems}: HeaderProps) {
   console.log('Header', showItems)
   return (
-    <header className={`sticky w-screen top-0 z-50 flex items-center ${showItems ? 'justify-between' : 'justify-center'} h-16 px-4 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl`}>
+    <header className={`w-screen z-50 flex items-center ${showItems ? 'justify-between' : 'justify-center'} h-16 px-4 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl`}>
       {showItems && (
         <div className="flex gap-2">
         <div

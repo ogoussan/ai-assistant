@@ -49,7 +49,7 @@ export function Chat({ id, className, userId, missingKeys }: ChatProps) {
     if (messagesLength === 2 && !isPending) {
       router.refresh()
     }
-    
+
   }, [messages, router, isPending])
 
   useEffect(() => {
@@ -70,17 +70,15 @@ export function Chat({ id, className, userId, missingKeys }: ChatProps) {
 
   return (
     <div
-      className="flex flex-col flex-1 group overflow-auto"
+      className="flex-1 flex flex-col"
       ref={scrollRef}
     >
       <div
-        className={cn('flex-1 pt-4 md:pt-10', className)}
+        className={cn('flex flex-col', className)}
         ref={messagesRef}
-      >
-        <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} isLoading={isRespondLoading} />
-
-        <div className="w-full h-px" ref={visibilityRef} />
-      </div>
+      ></div>
+      <ChatList messages={messages} streamedResponse={streamedResponse} isShared={false} isLoading={isRespondLoading} />
+      <div className="w-full h-px" ref={visibilityRef} />
       <ChatPanel
         id={id}
         messages={messages}

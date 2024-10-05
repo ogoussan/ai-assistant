@@ -18,7 +18,7 @@ interface ContentContainerProps {
     containerClassName?: string,
 }
 
-const ContentContainer = ({ children, isAuthenticated, containerClassName = "flex flex-1 w-screen justify-between" }: ContentContainerProps) => {
+const ContentContainer = ({ children, isAuthenticated, containerClassName = "flex flex-1 w-screen min-h-0 justify-between "}: ContentContainerProps) => {
     const [status, setStatus] = useState<containerStatus>({
         leftPanelOpened
             : localStorage.getItem(LEFT_PANEL) === 'true',
@@ -54,7 +54,7 @@ const ContentContainer = ({ children, isAuthenticated, containerClassName = "fle
     console.log("authenticated: ", isAuthenticated)
 
     return (
-        <div className="flex flex-col justify-between items-center h-screen">
+        <div className="flex flex-col items-center h-screen">
             <Header 
                 toggleLeftPanel={toggleLeftPanel} 
                 toggleRightPanel={toggleRightPanel}

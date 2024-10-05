@@ -56,7 +56,7 @@ export function ChatPanel({
 
   return (
     <>
-      <div className="sticky inset-x-0 bottom-0 w-full bg-gradient-to-b from-muted/30 from-0% to-muted/30 to-50% duration-300 ease-in-out animate-in dark:from-background/10 dark:from-10% dark:to-background/80 peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]">
+      <div className="inset-x-0 bottom-0 w-full bg-gradient-to-b from-muted/30 from-0% to-muted/30 to-50% duration-300 ease-in-out animate-in dark:from-background/10 dark:from-10% dark:to-background/80 peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]">
         <ButtonScrollToBottom
           isAtBottom={isAtBottom}
           scrollToBottom={scrollToBottom}
@@ -81,31 +81,27 @@ export function ChatPanel({
               ))}
           </div>
 
-          {messages?.length >= 2 ? (
+          {messages?.length >= 2 && id && title ? (
             <div className="flex h-12 items-center justify-center">
               <div className="flex space-x-2">
-                {id && title ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShareDialogOpen(true)}
-                    >
-                      <IconShare className="mr-2" />
-                      Share
-                    </Button>
-                    <ChatShareDialog
-                      open={shareDialogOpen}
-                      onOpenChange={setShareDialogOpen}
-                      onCopy={() => setShareDialogOpen(false)}
-                      shareChat={shareChat}
-                      chat={{
-                        id,
-                        title,
-                        messages
-                      }}
-                    />
-                  </>
-                ) : null}
+                <Button
+                  variant="outline"
+                  onClick={() => setShareDialogOpen(true)}
+                >
+                  <IconShare className="mr-2" />
+                  Share
+                </Button>
+                <ChatShareDialog
+                  open={shareDialogOpen}
+                  onOpenChange={setShareDialogOpen}
+                  onCopy={() => setShareDialogOpen(false)}
+                  shareChat={shareChat}
+                  chat={{
+                    id,
+                    title,
+                    messages
+                  }}
+                />
               </div>
             </div>
           ) : null}

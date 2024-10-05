@@ -4,8 +4,14 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { kv } from '@vercel/kv'
 
-import { type Chat } from '@/lib/types'
+import { FileData, Message, type Chat } from '@/lib/types'
 import { stackServerApp } from '@/stack'
+import { respondToUserMessage } from '@/lib/assistant/chat-completion'
+import { addDocuments } from '@/lib/knowledge-base/pinecone'
+import { uploadFile } from '@/lib/knowledge-base/s3'
+import { loadFile } from '@/lib/loaders'
+import { nanoid } from 'nanoid'
+import { NextResponse } from 'next/server'
 
 export async function getChats(userId?: string | null) {
   if (!userId) {
@@ -24,7 +30,7 @@ export async function getChats(userId?: string | null) {
     }
 
     const results = await pipeline.exec()
-    console.log(`[app/actions]: Chat fetch result: ...`) 
+    console.log(`[app/actions]: Chat fetch result: ...`)
 
     return results as Chat[]
   } catch (error) {
@@ -76,7 +82,7 @@ export async function clearChats() {
   console.log('[app/actions - clearChat]: Clearing chat')
   const user = await stackServerApp.getUser()
 
-  if (user.id) {
+  if (!user?.id) {
     return {
       error: 'Unauthorized'
     }
@@ -84,7 +90,7 @@ export async function clearChats() {
 
   const chats: string[] = await kv.zrange(`user:chat:${user.id}`, 0, -1)
   if (!chats.length) {
-    // return redirect('/')
+    return redirect('/')
   }
   const pipeline = kv.pipeline()
 
@@ -96,7 +102,7 @@ export async function clearChats() {
   await pipeline.exec()
 
   revalidatePath('/')
-  // return redirect('/')
+  return redirect('/')
 }
 
 export async function getSharedChat(id: string) {

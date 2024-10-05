@@ -161,9 +161,9 @@ export function FileExplorer({ userId }: { userId: string }) {
       {!!openedFileItem && (
         <div className="p-2">
           <FileDialog
-            open={true} 
-            file={openedFileItem} 
-            onOpenChange={closeFileItem} 
+            open={true}
+            file={openedFileItem}
+            onOpenChange={closeFileItem}
           />
         </div>
       )}
@@ -186,7 +186,7 @@ export function FileExplorer({ userId }: { userId: string }) {
           />
         )}
         {(
-          <div className="flex flex-col gap-2 max-w-[75vh] overflow-y-scroll pr-4">
+          <div className="flex flex-col gap-2 pr-4">
             {!isSelectionDisabled && (!isSelecting ? (
               <Button className="ml-auto flex gap-2 hover:bg-background border-2 border-secondary" variant="secondary" onClick={() => {
                 setIsSelecting(true)
@@ -220,50 +220,52 @@ export function FileExplorer({ userId }: { userId: string }) {
               </motion.div>
             ))}
             {isLoading && <Skeleton className="w-full h-[56px] rouded-md" />}
-            {visibleFolders.map((item) => (
-              <motion.div
-                key={item.path}
-                className="flex justify-end mt-auto"
-                {...itemAnimation}
-              >
-                <FolderItem
-                  name={item.name}
-                  term={searchQuery}
-                  selected={isItemSelected(item.path)}
-                  onClick={() => {
-                    navigateToFolder(item)
-                    setSearchQuery('')
-                  }}
-                  onSelect={() => toggleSelectItem(item)}
-                  showCheckbox={isSelecting}
-                />
-              </motion.div>
-            ))}
-            {visibleFiles.map((item) => (
-              <motion.div
-                key={item.path}
-                className="flex justify-end mt-auto"
-                {...itemAnimation}
-              >
-                <FileItem
-                  name={item.name}
-                  term={searchQuery}
-                  selected={isItemSelected(item.path)}
-                  onSelect={() => toggleSelectItem(item)}
-                  onOpen={() => openFile(item)}
-                  onRename={(name) => renameItem(item, name)}
-                  onMove={() => {
-                    toggleSelectItem(item)
-                    setDisplayStatus('move')
-                    setIsSelecting(false)
-                  }}
-                  onDelete={() => {
-                    deleteItems([item])
-                  }}
-                  showCheckbox={isSelecting}
-                />
-              </motion.div>
-            ))}
+            <div className="flex flex-col gap-2 max-h-[calc(100vh-300px)] pr-4 overflow-y-scroll">
+              {visibleFolders.map((item) => (
+                <motion.div
+                  key={item.path}
+                  className="flex justify-end mt-auto"
+                  {...itemAnimation}
+                >
+                  <FolderItem
+                    name={item.name}
+                    term={searchQuery}
+                    selected={isItemSelected(item.path)}
+                    onClick={() => {
+                      navigateToFolder(item)
+                      setSearchQuery('')
+                    }}
+                    onSelect={() => toggleSelectItem(item)}
+                    showCheckbox={isSelecting}
+                  />
+                </motion.div>
+              ))}
+              {visibleFiles.map((item) => (
+                <motion.div
+                  key={item.path}
+                  className="flex justify-end mt-auto"
+                  {...itemAnimation}
+                >
+                  <FileItem
+                    name={item.name}
+                    term={searchQuery}
+                    selected={isItemSelected(item.path)}
+                    onSelect={() => toggleSelectItem(item)}
+                    onOpen={() => openFile(item)}
+                    onRename={(name) => renameItem(item, name)}
+                    onMove={() => {
+                      toggleSelectItem(item)
+                      setDisplayStatus('move')
+                      setIsSelecting(false)
+                    }}
+                    onDelete={() => {
+                      deleteItems([item])
+                    }}
+                    showCheckbox={isSelecting}
+                  />
+                </motion.div>
+              ))}
+            </div>
           </div>
         )}
         <FileExplorerButton {...moveHereButtonProps} />

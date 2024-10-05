@@ -9,9 +9,16 @@ export const metadata = {
   title: 'Next.js AI Chatbot'
 }
 
-export default async function ChatPage() {
-    // TODO: Fetch id from params
-    const id = nanoid()
+export default async function ChatPage({
+    params,
+    searchParams,
+  }: {
+    params: { slug: string };
+    searchParams?: { [key: string]: string | string[] | undefined };
+  }) {
+    const chatId = params?.slug?.[0];
+    console.log('chatId', chatId)
+    const id = chatId || nanoid()
     const missingKeys = await getMissingKeys()
     const user = await stackServerApp.getUser()
 

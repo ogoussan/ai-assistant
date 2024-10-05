@@ -3,7 +3,7 @@ import { Message } from '@/lib/types'
 import Link from 'next/link'
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons'
 import { renderMessage, SpinnerMessage } from './message'
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 import { nanoid } from 'nanoid'
 import { useUser } from '@stackframe/stack'
 
@@ -19,7 +19,7 @@ export function ChatList({ messages = [], isShared, streamedResponse, isLoading 
  const user = useUser()
 
   return (
-    <div className="p-8">
+    <div className="flex-1 p-8 overflow-y-auto min-h-0">
       {!isShared && !user ? (
         <>
           <div className="group relative mb-4 flex items-start">
@@ -44,10 +44,10 @@ export function ChatList({ messages = [], isShared, streamedResponse, isLoading 
         </>
       ) : null}
       {messagesWithStreamedResponse.map((message, index) => (
-        <div key={message.id}>
+        <Fragment key={message.id}>
           {renderMessage(message.type, message.content as string)}
           {index < messagesWithStreamedResponse.length - 1 && <Separator className="my-4" />}
-        </div>
+        </Fragment>
       ))}
       { isLoading && !streamedResponse && <><Separator className="my-4" /><SpinnerMessage /></>}
     </div>

@@ -5,10 +5,11 @@ import Fuse from "fuse.js"
 import { createEmptyFolder, deleteObject, moveObject } from "../knowledge-base/s3"
 import { slicePath, splitFileName } from "../path.helper"
 import { PLACEHOLDER_FILE_NAME } from "@/constants/file-constants"
+import useSwr, { mutate } from 'swr'
 
 export const useFileExplorer = (userId: string) => {
-    const [isLoading, setIsLoading] = useState(false)
-    const [isInitialized, setIsInitialized] = useState(false)
+    const {data: totalItems = [], isLoading} = useSwr(`file-explorer/${userId}`, () => aggregateFileExplorerItems(userId));
+    console.log({totalItems, userId})
 
     // NAVIGATION STATE
     const [navigationFolderStack, setNavigationFolderStack] =
@@ -18,8 +19,6 @@ export const useFileExplorer = (userId: string) => {
         [navigationFolderStack]
     )
 
-    // ITEM STATE
-    const [totalItems, setTotalItems] = useState<FileExplorerItem[]>([])
     const folderItems = useMemo(() => [
         ...(currentFolder?.folders || []),
         ...(currentFolder?.files || [])
@@ -69,16 +68,6 @@ export const useFileExplorer = (userId: string) => {
 
 
     useEffect(() => {
-        if (!isInitialized) {
-            setIsLoading(true)
-            fetchItems().then(() => {
-                setIsLoading(false)
-                setIsInitialized(true)
-            })
-        }
-    }, [isInitialized])
-
-    useEffect(() => {
         if (totalItems.length && !navigationFolderStack.length) {
             const rootFolder =
                 totalItems.find((_item) => _item.path === userId) as FileExplorerFolder
@@ -89,12 +78,6 @@ export const useFileExplorer = (userId: string) => {
         }
     }, [totalItems])
 
-    const fetchItems = async (): Promise<FileExplorerItem[]> => {
-        const _items = await aggregateFileExplorerItems(userId)
-        setTotalItems(_items)
-
-        return _items
-    }
 
     const navigateToFolder = (
         folder: FileExplorerFolder,
@@ -160,7 +143,8 @@ export const useFileExplorer = (userId: string) => {
                 .slice(0, -1).join('/')
             const fileName = `${name}.${extension}`
             await moveObject(item.path, destinationPath, fileName)
-            const updatedItems = await fetchItems()
+            
+            const updatedItems = await mutate(`file-explorer/${userId}`)
             const updatedCurrentFolder = updatedItems
                 .find((item) => item.path === currentFolder.path) as FileExplorerFolder
             setNavigationFolderStack((prev) => [...prev.slice(0, -1), updatedCurrentFolder])
@@ -248,7 +232,7 @@ export const useFileExplorer = (userId: string) => {
         }
 
         await Promise.all(deletePaths.map(async (deletePath) => await deleteObject(deletePath)))
-        const updatedItems = await fetchItems()
+        const updatedItems = await mutate(`file-explorer/${userId}`)
         const updatedItemsPaths = updatedItems.map((item) => item.path)
         setNavigationFolderStack((prev) => {
             const filteredFolderStack = prev.filter((navigationFolder) => updatedItemsPaths.includes(navigationFolder.path))

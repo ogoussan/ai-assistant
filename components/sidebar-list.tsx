@@ -2,15 +2,10 @@ import { clearChats, getChats } from '@/app/actions'
 import { ClearHistory } from '@/components/clear-history'
 import { SidebarItems } from '@/components/sidebar-items'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Chat } from '@/lib/types'
-import { stackServerApp } from '@/stack'
 import { useUser } from '@stackframe/stack'
 import { cache, useEffect, useState } from 'react'
-
-interface SidebarListProps {
-  userId?: string
-  children?: React.ReactNode
-}
+import useSwr from 'swr'
+import { IconSpinner } from './ui/icons'
 
 const loadChats = cache(async (userId?: string) => {
   return await getChats(userId)
@@ -18,14 +13,13 @@ const loadChats = cache(async (userId?: string) => {
 
 export function SidebarList() {
   const user = useUser();
-  const [chats, setChats] = useState<Chat[]>([]);
+  const { data: chats = [], isLoading } = useSwr(`chats/${user?.id}`, () => loadChats(user?.id));
 
-  useEffect(() => {
-    (async () => {
-      const result = await loadChats(user?.id);
-      setChats(result)
-    })()
-  }, [user])
+  if (isLoading) {
+    <div className="flex-1 flex items-center justify-center">
+      <IconSpinner className="size-12" />
+    </div>
+  }
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">

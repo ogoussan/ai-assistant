@@ -90,12 +90,14 @@ export function useChatMessages(chatId: string,  userId?: string) {
         formData.append('chatId', chatId)
     
         try {
-            const response = await fetch('api/chat', {
+            const response = await fetch('../api/chat', {
                 method: 'POST',
                 body: formData,
             });
+
+            console.log('response', response)
     
-            if (!response.ok) {
+            if (!response || !response.ok) {
                 throw new Error('Network response was not ok')
             }
     
@@ -111,6 +113,7 @@ export function useChatMessages(chatId: string,  userId?: string) {
                 const { value, done: streamDone } = await reader!.read();
                 done = streamDone;
                 const chunk = decoder.decode(value, { stream: !done });
+                console.log('chunk', chunk)
                 setStreamedResponse((prev) => prev + chunk);
                 fullText += chunk;
             }
