@@ -10,7 +10,6 @@ import { addDocuments } from "@/lib/knowledge-base/pinecone";
 export const POST = async (request: Request) => {
 
     const user = await stackServerApp.getUser()
-    console.log('chat sending message...')
 
     try {
         const contentType = request.headers.get('Content-Type') || '';

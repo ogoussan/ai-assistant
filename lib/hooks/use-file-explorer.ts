@@ -7,6 +7,7 @@ import { slicePath, splitFileName } from "../path.helper"
 import { PLACEHOLDER_FILE_NAME } from "@/constants/file-constants"
 import useSwr, { mutate } from 'swr'
 
+
 export const useFileExplorer = (userId: string) => {
     const {data: totalItems = [], isLoading} = useSwr(`file-explorer/${userId}`, () => aggregateFileExplorerItems(userId));
     console.log({totalItems, userId})

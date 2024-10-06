@@ -3,8 +3,8 @@ import { ClearHistory } from '@/components/clear-history'
 import { SidebarItems } from '@/components/sidebar-items'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useUser } from '@stackframe/stack'
-import { cache, useEffect, useState } from 'react'
-import useSwr from 'swr'
+import { cache } from 'react'
+import useSwr, { mutate } from 'swr'
 import { IconSpinner } from './ui/icons'
 
 const loadChats = cache(async (userId?: string) => {
@@ -14,6 +14,10 @@ const loadChats = cache(async (userId?: string) => {
 export function SidebarList() {
   const user = useUser();
   const { data: chats = [], isLoading } = useSwr(`chats/${user?.id}`, () => loadChats(user?.id));
+
+  const handleClear = () => {
+    return clearChats().then(() => mutate(`chat/${user?.id}`))
+  }
 
   if (isLoading) {
     <div className="flex-1 flex items-center justify-center">
@@ -36,7 +40,7 @@ export function SidebarList() {
       </div>
       <div className="flex items-center justify-between p-4">
         <ThemeToggle />
-        <ClearHistory clearChats={clearChats} isEnabled={chats?.length > 0} />
+        <ClearHistory clearChats={handleClear} isEnabled={chats?.length > 0} />
       </div>
     </div>
   )

@@ -1,0 +1,1 @@
+export const SIMILARITY_SEARCH_MAX_RESULTS = 20;

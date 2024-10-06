@@ -37,7 +37,7 @@ export function Chat({ id, className, userId, missingKeys }: ChatProps) {
 
   useEffect(() => {
     if (user) {
-      if (!path.includes('chat') && messages.length === 1) {
+      if (messages.length === 1) {
         console.log(`[Chat] Navigate to new chat with id ${id}`)
         window.history.replaceState({}, '', `/chat/${id}`)
       }
@@ -82,6 +82,7 @@ export function Chat({ id, className, userId, missingKeys }: ChatProps) {
       <ChatPanel
         id={id}
         messages={messages}
+        messagesLoading={isPending}
         input={input}
         setInput={setInput}
         sendMessage={_sendMessage}

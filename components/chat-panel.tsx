@@ -12,6 +12,7 @@ export interface ChatPanelProps {
   id?: string
   title?: string
   messages: Message[]
+  messagesLoading?: boolean;
   input: string
   setInput: (value: string) => void
   sendMessage: (content: string, files: FileData[]) => Promise<void>
@@ -23,6 +24,7 @@ export function ChatPanel({
   id,
   title,
   messages,
+  messagesLoading,
   input,
   setInput,
   sendMessage: sendUserMessage,
@@ -63,7 +65,7 @@ export function ChatPanel({
         />
         <div className="mx-auto sm:max-w-2xl sm:px-4">
           <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
-            {messages.length === 0 &&
+            {messages.length === 0 && !messagesLoading &&
               exampleMessages.map((example, index) => (
                 <div
                   key={example.heading}
@@ -81,30 +83,7 @@ export function ChatPanel({
               ))}
           </div>
 
-          {messages?.length >= 2 && id && title ? (
-            <div className="flex h-12 items-center justify-center">
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShareDialogOpen(true)}
-                >
-                  <IconShare className="mr-2" />
-                  Share
-                </Button>
-                <ChatShareDialog
-                  open={shareDialogOpen}
-                  onOpenChange={setShareDialogOpen}
-                  onCopy={() => setShareDialogOpen(false)}
-                  shareChat={shareChat}
-                  chat={{
-                    id,
-                    title,
-                    messages
-                  }}
-                />
-              </div>
-            </div>
-          ) : null}
+        
           <div className="space-y-4 border-t bg-background px-4 py-2 shadow-lg sm:rounded-t-xl sm:border md:py-4">
             <PromptForm input={input} setInput={setInput} sendUserMessage={sendUserMessage} />
           </div>

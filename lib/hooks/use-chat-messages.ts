@@ -2,6 +2,7 @@ import { getChat, saveChat } from "@/app/actions";
 import { Chat, FileData, Message } from "@/lib/types";
 import { nanoid } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { mutate } from 'swr'
 
 export function useChatMessages(chatId: string,  userId?: string) {
     const [messages, setMessages] = useState<Message[]>([])
@@ -113,7 +114,6 @@ export function useChatMessages(chatId: string,  userId?: string) {
                 const { value, done: streamDone } = await reader!.read();
                 done = streamDone;
                 const chunk = decoder.decode(value, { stream: !done });
-                console.log('chunk', chunk)
                 setStreamedResponse((prev) => prev + chunk);
                 fullText += chunk;
             }
@@ -127,7 +127,8 @@ export function useChatMessages(chatId: string,  userId?: string) {
                     content: fullText,
                 }
             ]);
-    
+            await mutate(`chats/${userId}`);
+
             setStreamedResponse('');
         } catch (error) {
             console.error('Fetch failed:', error);

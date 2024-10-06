@@ -7,13 +7,23 @@ import { removeChat, shareChat } from '@/app/actions'
 
 import { SidebarActions } from '@/components/sidebar-actions'
 import { SidebarItem } from '@/components/sidebar-item'
+import { mutate } from 'swr'
+import { useUser } from '@stackframe/stack'
 
 interface SidebarItemsProps {
   chats?: Chat[]
 }
 
-export function SidebarItems({ chats }: SidebarItemsProps) {
+export function SidebarItems({ chats = [] }: SidebarItemsProps) {
   if (!chats?.length) return null
+
+  const user = useUser();
+
+  const handleRemoveChat = (chatData: {id: string, path: string}) => {
+    return removeChat(chatData).then(() => {
+      mutate(`chats/${user?.id}`)
+    })
+  }
 
   return (
     <AnimatePresence>
@@ -30,7 +40,7 @@ export function SidebarItems({ chats }: SidebarItemsProps) {
               <SidebarItem index={index} chat={chat}>
                 <SidebarActions
                   chat={chat}
-                  removeChat={removeChat}
+                  removeChat={handleRemoveChat}
                   shareChat={shareChat}
                 />
               </SidebarItem>

@@ -43,7 +43,7 @@ export function ChatList({ messages = [], isShared, streamedResponse, isLoading 
           <Separator className="my-4" />
         </>
       ) : null}
-      {messagesWithStreamedResponse.map((message, index) => (
+      {messages.map((message, index) => (
         <Fragment key={message.id}>
           {renderMessage(message.type, message.content as string)}
           {index < messagesWithStreamedResponse.length - 1 && <Separator className="my-4" />}
